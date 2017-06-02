@@ -5,7 +5,7 @@ A mod for [Kerbal Space Program](http://kerbalspaceprogram.com).
 [KSP Forum Thread](http://forum.kerbalspaceprogram.com/index.php?showtopic=160268)
 
 AirlockPlus allows the use of any airlock on a vessel in conjunction with any crew part on the vessel:
-- A kerbal in EVA can use any airlock to board any part of the vessel, not just the part that the airlock is attached to.
+- A kerbal on EVA can use any airlock to board any part of the vessel, not just the part that the airlock is attached to.
 - A kerbal in any part of the vessel can go EVA using any airlock on the vessel, not just the airlock(s) on the part that they currently occupy.
 - All of this happens seamlessly -- no need to manually transfer kerbals between parts.
 - Works even if the airlock part is already full of other kerbals. 

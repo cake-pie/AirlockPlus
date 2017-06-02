@@ -2,7 +2,8 @@ License Information
 ===================
 
 AirlockPlus source code, compiled binaries, and configuration files are © cake>pie  
-Localizations are released under a Creative Commons CC-BY-SA 4.0 International license. Translation credits can be found [here](https://github.com/cake-pie/AirlockPlus/blob/master/localization/TRANSLATING.md).
+Localizations are released under a Creative Commons CC-BY-SA 4.0 International license.  
+Translation credits can be found [here](https://github.com/cake-pie/AirlockPlus/blob/master/Localization/TRANSLATING.md).
 
 **End users:**  
 You may make and distribute media (e.g. screenshots, gameplay videos, etc.) that portray AirlockPlus in use.  
@@ -42,10 +43,10 @@ In the event that:
 - The author/maintainer of the mod has not been active on both the KSP forums and on GitHub for a continuous duration of thirty (30) days.
 - A post in the mod's forum thread, @mentioning the author/maintainer, has not received a response after an *additonal* ten (10) days.
 
-When *all* of the above conditions have been met, permission is granted to fork the mod's GitHub project, make the necessary changes for compatibility with KSP, and release the resulting binaries by posting in the mod's KSP forum thread.  
+When *all* of the above conditions have been met, permission is granted to make the necessary changes for compatibility with KSP, and release the resulting binaries by posting in the mod's KSP forum thread.  
 Such a release:
 - May only address compatibility issues with KSP, and must not introduce new features or functionality.
-- Must be clearly marked as UNOFFICIAL, and indicate the KSP version number that it is intended for. Do not increment the official version number.
+- Must be clearly marked as UNOFFICIAL, and indicate the KSP version number that it is intended for.
 - The modified source code must be made publicly available to comply with the official Add-on Posting Rules.
 - Must not require payment, and may not be used to solicit for donations.
 - Must be removed upon being superceded by an official release of the mod, or upon request of the mod author/maintainer.
