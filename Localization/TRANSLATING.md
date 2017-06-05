@@ -14,8 +14,7 @@ Translation Credits
 * Summerfirefly [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/107915-summerfirefly/)]
 
 **Japanese**
-* cake>pie [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/69278-cakepie/) / [github](https://github.com/cake-pie)]
-* Proofreader wanted!
+* EBOSHI [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/165938-eboshi/) / [github](https://github.com/eboshi2525)]
 
 **Russian**
 * Translator wanted!
