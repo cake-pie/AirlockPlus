@@ -46,6 +46,9 @@ namespace AirlockPlus
 		private Part lastHovered = null;
 		private Dictionary<uint,Part> highlightParts = new Dictionary<uint,Part>();
 
+		// stock command hint removal
+		private List<ScreenMessage> smToRemove = new List<ScreenMessage>();
+
 		// CLS support
 		private Action _BoardAuto;
 		private Action _BoardManualListParts;
@@ -81,7 +84,7 @@ namespace AirlockPlus
 		#region Input / UI
 		public override void OnUpdate() {
 			// Do nothing unless this KerbalEVA is the active vessel in flight, in vessel view, and positioned to enter an airlock
-			if (!HighLogic.LoadedSceneIsFlight || !vessel.isActiveVessel || inMap || tgtAirlockPart == null)
+			if (tgtAirlockPart == null || !HighLogic.LoadedSceneIsFlight || !vessel.isActiveVessel || inMap)
 				return;
 
 			// HACK: re-enable KerbalEVA one frame after blocking stock boarding from registering alongside auto boarding
@@ -93,7 +96,7 @@ namespace AirlockPlus
 			if (manualBoarding) {
 				// Not checking for input locks in here, we should be holding the lock on all but camera controls at this juncture
 
-				// Use GetKeyUp instead of GetKey/GetKeyDown, seems sufficient to prevent triggering game pause immediately upon releasing input lock
+				// Use GetKeyUp instead of GetKey/GetKeyDown prevents triggering game pause immediately upon releasing input lock
 				if (Input.GetKeyUp(KeyCode.Escape)) {
 					BoardManualCxl();
 					return;
@@ -147,7 +150,6 @@ namespace AirlockPlus
 		//     - This turns kerbal into a drifting brick because KerbalEVA is responsible for maintaining correct position and orientation of the EVA kerbal part/vessel with respect to world space.
 		private void LateUpdate() {
 			if (manualBoarding) {
-				List<ScreenMessage> smToRemove = new List<ScreenMessage>();
 				foreach (ScreenMessage sm in ScreenMessages.Instance.ActiveMessages) {
 					if(sm.style==ScreenMessageStyle.LOWER_CENTER) {
 						smToRemove.Add(sm);
@@ -156,6 +158,7 @@ namespace AirlockPlus
 				foreach (ScreenMessage sm in smToRemove) {
 					ScreenMessages.RemoveMessage(sm);
 				}
+				smToRemove.Clear();
 			}
 		}
 		#endregion
@@ -312,8 +315,9 @@ namespace AirlockPlus
 		}
 
 		private void CLSBoardManualListParts() {
+			Part p;
 			foreach (ICLSPart clsp in CLSClient.GetCLS().getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space.Parts) {
-				Part p = clsp.Part;
+				p = clsp.Part;
 				if (p.CrewCapacity>0) {
 					highlightParts.Add(p.flightID,p);
 					p.Highlight(false);

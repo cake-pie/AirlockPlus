@@ -34,6 +34,9 @@ namespace AirlockPlus
 		private static float RAYCAST_DIST = 100f;
 		private RaycastHit hit;
 
+		// selected airlock part
+		Part airlockPart;
+
 		// hijacking the CrewHatchDialog to display alternative crew list
 		private bool hijack = false;
 		// HACK: delayed hijack
@@ -81,7 +84,7 @@ namespace AirlockPlus
 			if (!CrewHatchController.fetch.Active)
 				return;
 
-			Part airlockPart = hit.collider.GetComponentInParent<Part>();
+			airlockPart = hit.collider.GetComponentInParent<Part>();
 
 			Debug.Log("[AirlockPlus] INFO: hijacking CrewHatchDialog for airlock " + hit.collider.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
 			CrewHatchDialog chd = CrewHatchController.fetch.CrewDialog;
@@ -108,7 +111,7 @@ namespace AirlockPlus
 
 			// Crew in airlock part
 			addCrewToList(listContainer, airlockPart);
-			// Crew in other parts
+				// Crew in other parts
 			if (useCLS) {
 				ICLSSpace clsSpace = CLSClient.GetCLS().getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
 				foreach (ICLSPart p in clsSpace.Parts) {
@@ -119,6 +122,7 @@ namespace AirlockPlus
 				chd.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlusAP001", clsSpace.Crew.Count, clsSpace.MaxCrew);
 			}
 			else {
+				// Crew in other parts
 				foreach (Part p in airlockPart.vessel.parts) {
 					if (p != airlockPart)
 						addCrewToList(listContainer.transform, p);
@@ -157,7 +161,7 @@ namespace AirlockPlus
 
 			// sanity checks, in case of unexpected death, destruction or separation
 			if (pcm.rosterStatus != ProtoCrewMember.RosterStatus.Assigned || pcm.inactive || pcm.outDueToG) return;
-			if (pcm.KerbalRef.InVessel != hit.collider.GetComponentInParent<Part>().vessel) return;
+			if (pcm.KerbalRef.InVessel != airlockPart.vessel) return;
 
 			// prohibitions
 			if (pcm.type == ProtoCrewMember.KerbalType.Tourist) {
