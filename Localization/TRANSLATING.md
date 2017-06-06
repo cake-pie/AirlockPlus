@@ -18,6 +18,7 @@ Translation Credits
 
 **Russian**
 * Translator wanted!
+* Teilnehmer [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/143330-teilnehmer/) / [github](https://github.com/formicant)]
 
 **Spanish**
 * GonDragon [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/174274-gondragon/)]
