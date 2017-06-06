@@ -11,6 +11,6 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyTrademark ("")]
 [assembly: AssemblyCulture ("")]
 
-[assembly: AssemblyVersion ("0.0.7.*")]
+[assembly: AssemblyVersion ("0.0.8.*")]
 
 [assembly: KSPAssembly("AirlockPlus", 0, 0)]

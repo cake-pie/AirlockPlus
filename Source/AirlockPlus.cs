@@ -111,8 +111,8 @@ namespace AirlockPlus
 
 			// Crew in airlock part
 			addCrewToList(listContainer, airlockPart);
-				// Crew in other parts
 			if (useCLS) {
+				// Crew in other parts
 				ICLSSpace clsSpace = CLSClient.GetCLS().getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
 				foreach (ICLSPart p in clsSpace.Parts) {
 					if (p.Part != airlockPart)
@@ -173,7 +173,15 @@ namespace AirlockPlus
 				return;
 			}
 
-			FlightEVA.fetch.spawnEVA(pcm,pcm.KerbalRef.InPart,hit.collider.transform);
+			// HACK: ensure HatchIsObstructed functions correctly
+			// spawnEVA assumes fromPart corresponds to fromAirlock; these are passed on to FlightEVA.HatchIsObstructed
+			// Using a different fromPart than what stock expects can lead to spurious results when checking hatches for obstruction
+			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects... 
+			Part kerbalPart = pcm.KerbalRef.InPart;
+			Vector3 original = kerbalPart.transform.position;
+			kerbalPart.transform.position = airlockPart.transform.position;
+			FlightEVA.fetch.spawnEVA(pcm,kerbalPart,hit.collider.transform);
+			kerbalPart.transform.position = original;
 		}
 		#endregion
 
