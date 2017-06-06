@@ -17,7 +17,7 @@ Translation Credits
 * EBOSHI [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/165938-eboshi/) / [github](https://github.com/eboshi2525)]
 
 **Russian**
-* Translator wanted!
+* KerbOrbiter [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/58103-kerborbiter/) / [github](https://github.com/Metadorius)]
 * Teilnehmer [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/143330-teilnehmer/) / [github](https://github.com/formicant)]
 
 **Spanish**
