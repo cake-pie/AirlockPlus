@@ -161,7 +161,7 @@ namespace AirlockPlus
 
 			// sanity checks, in case of unexpected death, destruction or separation
 			if (pcm.rosterStatus != ProtoCrewMember.RosterStatus.Assigned || pcm.inactive || pcm.outDueToG) return;
-			if (pcm.KerbalRef.InVessel != airlockPart.vessel) return;
+			if (airlockPart.State == PartStates.DEAD || pcm.KerbalRef.InVessel != airlockPart.vessel) return;
 
 			// prohibitions
 			if (pcm.type == ProtoCrewMember.KerbalType.Tourist) {
