@@ -3,7 +3,14 @@ Translating AirlockPlus
 
 Localizations for AirlockPlus are under a Creative Commons CC-BY-SA 4.0 International license.  
 Translations, corrections, and other assistance are welcome, and gratefully accepted.  
-To contribute, please get in touch by posting on the [KSP Forum Thread](http://forum.kerbalspaceprogram.com/index.php?showtopic=160268)!
+To contribute, please get in touch via the [KSP Forum Thread](http://forum.kerbalspaceprogram.com/index.php?showtopic=160268) before you start.
+
+
+Guidelines
+----------
+Localization is not merely a matter of grabbing a text file and translating it!  While the localized text needs to convey the intended meaning, word-for-word translation is *not* the main goal.  Here are some other considerations to keep in mind:
+- Context is important.  Where is the text string used?  How much space is available?  Should the text be a concise prompt, or give detailed instructions?
+- Mods should fit in well with the main game in terms of behavior and "look and feel", so as to maintain a sense of familiarity and continuity for players.  This means that for stock-supported languages, it is desirable to remain consistent with the official localization in terms of word choices and sentence structure.  Likewise, for community-supported languages, it is best to conform with the community translation for the main game.
 
 
 Translation Credits
