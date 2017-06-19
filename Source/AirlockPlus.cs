@@ -35,7 +35,7 @@ namespace AirlockPlus
 		private RaycastHit hit;
 
 		// selected airlock part
-		Part airlockPart;
+		private Part airlockPart;
 
 		// hijacking the CrewHatchDialog to display alternative crew list
 		private bool hijack = false;
@@ -68,7 +68,7 @@ namespace AirlockPlus
 			}
 
 			// Note: ControlTypes.KEYBOARDINPUT is locked when vessel lacks control.
-			// So we cannot gate this alt+click behind InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT)
+			// So we cannot gate this mod+click behind InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT)
 			if (modkey.GetKey() && Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left)) {
 				if ( Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
 					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
@@ -111,6 +111,7 @@ namespace AirlockPlus
 
 			// Crew in airlock part
 			addCrewToList(listContainer, airlockPart);
+
 			if (useCLS) {
 				// Crew in other parts
 				ICLSSpace clsSpace = CLSClient.GetCLS().getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
