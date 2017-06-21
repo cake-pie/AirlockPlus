@@ -39,16 +39,14 @@ namespace AirlockPlus
 
 		// hijacking the CrewHatchDialog to display alternative crew list
 		private bool hijack = false;
-		// HACK: delayed hijack
-		// It usually takes stock KSP one frame to spawn the CrewHatchDialog, then one frame to actually populate it. But this delay is inconsistent.
-		// On occasion it can take one or two more frames, no idea why. So just to be safe, we wait for five frames before hijacking the dialog.
-		// Otherwise, when stock KSP populates the CrewHatchDialog, it will overwrite our stuff (instead of the other way round).
-		//   Notes:
-		//   This does not seem to be due our raycast occurring in LateUpdate.
-		//   Moving our raycast to FixedUpdate does not appear to help improve the consistency of the delay, only makes our code more complex.
-		//   Also, CrewHatchController maintains RaycastHit rayHit and has only LateUpdate, not FixedUpdate... so it is probably raycasting in LateUpdate too.
-		private static int FRAMEWAIT = 5;
+		private CrewHatchDialog chd;
+		// HACK: check if stock KSP is done populating CrewHatchDialog before hijacking it
+		// It takes stock KSP an inconsistent amount of time to activate CrewHatchController, and then spawn and populate the CrewHatchDialog.
+		// We need to wait for stock KSP to finish populating the CrewHatchDialog, otherwise it will overwrite our stuff (instead of the other way round).
+		// Absent of any formal indication that CrewHatchDialog is "done populating", we will need to jump through a few hoops to accomplish this.
 		private int frame = 0;
+		private static readonly int FRAMEWAIT = 5;
+		private static readonly string CHD_NOTREADY_HEADER = "Part Title Crew";
 
 		// CLS support
 		internal static bool useCLS = false;
@@ -57,41 +55,57 @@ namespace AirlockPlus
 		#region Input / UI
 		// emulate CrewHatchController, which uses LateUpdate(), not Update()
 		private void LateUpdate() {
-			if (hijack) {
-				frame++;
-				// waiting a few frames for stock KSP to finish setting up the CrewHatchDialog so it won't overwrite our changes
-				if (frame >= FRAMEWAIT) {
-					frame = 0;
-					hijack = false;
-					doHijack();
-				}
-			}
+			if (hijack)
+				considerHijack();
 
 			// Note: ControlTypes.KEYBOARDINPUT is locked when vessel lacks control.
 			// So we cannot gate this mod+click behind InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT)
 			if (modkey.GetKey() && Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left)) {
 				if ( Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
 					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
+						Debug.Log("[AirlockPlus] INFO: mod+click detected on airlock, standing by to hijack CrewHatchDialog.");
 						hijack = true;
-						frame = 0; // reset frame wait count in case of clicks in rapid succession
+						chd = null;
+						frame = 0;
 					}
 				}
 			}
 		}
 
-		private void doHijack() {
-			// abort if CrewHatchController isn't active
-			if (!CrewHatchController.fetch.Active)
-				return;
+		private void considerHijack() {
+			frame++;
+			Debug.Log("[AirlockPlus] INFO: considering hijack @ frame +" + frame);
 
-			airlockPart = hit.collider.GetComponentInParent<Part>();
-
-			Debug.Log("[AirlockPlus] INFO: hijacking CrewHatchDialog for airlock " + hit.collider.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
-			CrewHatchDialog chd = CrewHatchController.fetch.CrewDialog;
-			if (chd == null) {
-				Debug.Log("[AirlockPlus] ERROR: failed to obtain CrewHatchDialog.");
+			// can't do anything if CrewHatchController isn't active yet
+			if (!CrewHatchController.fetch.Active) {
+				// abort if CrewHatchController still isn't active after FRAMEWAIT -- e.g. player may have cancelled by clicking elsewhere
+				if (frame > FRAMEWAIT) {
+					Debug.Log("[AirlockPlus] INFO: CrewHatchController is still inactive, aborting hijack.");
+					hijack = false;
+					chd = null;
+					frame = 0;
+				}
 				return;
 			}
+
+			// fetch CrewHatchDialog
+			if (chd == null) {
+				chd = CrewHatchController.fetch.CrewDialog;
+				if (chd == null) {
+					Debug.Log("[AirlockPlus] ERROR: failed to obtain CrewHatchDialog.");
+					return;
+				}
+			}
+
+			// test if TextHeader has been changed from its placeholder value, as proxy indicator for CrewHatchDialog "done populating"
+			if (CHD_NOTREADY_HEADER.Equals(chd.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text))
+				return;
+
+			// stock KSP done setting up CrewHatchDialog contents, proceed with hijacking
+			airlockPart = hit.collider.GetComponentInParent<Part>();
+			Debug.Log("[AirlockPlus] INFO: hijacking CrewHatchDialog for airlock " + hit.collider.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
+			hijack = false;
+			frame = 0;
 
 			// TextHeader
 			chd.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlus00000");
@@ -105,6 +119,7 @@ namespace AirlockPlus
 			// EmptyModuleText
 			if (airlockPart.vessel.GetCrewCount() == 0) {
 				listContainer.GetChild(0).gameObject.SetActive(true);
+				chd = null;
 				return;
 			}
 			listContainer.GetChild(0).gameObject.SetActive(false);
@@ -131,6 +146,8 @@ namespace AirlockPlus
 				// TextModuleCrew
 				chd.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlusAP001", airlockPart.vessel.GetCrewCount(), airlockPart.vessel.GetCrewCapacity());
 			}
+
+			chd = null;
 		}
 
 		private void addCrewToList(Transform listContainer, Part p) {
@@ -177,12 +194,14 @@ namespace AirlockPlus
 			// HACK: ensure HatchIsObstructed functions correctly
 			// spawnEVA assumes fromPart corresponds to fromAirlock; these are passed on to FlightEVA.HatchIsObstructed
 			// Using a different fromPart than what stock expects can lead to spurious results when checking hatches for obstruction
-			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects... 
+			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects...
 			Part kerbalPart = pcm.KerbalRef.InPart;
 			Vector3 original = kerbalPart.transform.position;
 			kerbalPart.transform.position = airlockPart.transform.position;
 			FlightEVA.fetch.spawnEVA(pcm,kerbalPart,hit.collider.transform);
 			kerbalPart.transform.position = original;
+
+			airlockPart = null;
 		}
 		#endregion
 
