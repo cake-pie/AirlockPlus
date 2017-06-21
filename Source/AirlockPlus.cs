@@ -158,7 +158,7 @@ namespace AirlockPlus
 				bool isTourist = (pcm.type == ProtoCrewMember.KerbalType.Tourist);
 
 				DialogGUIBase[] items = new DialogGUIBase[2];
-				items[0] = new DialogGUILabel("<size=15><b>"+pcm.name+"</b></size>" + (isTourist?"<size=10> "+ Localizer.Format("#autoLOC_AirlockPlusAP002") +"</size>":"") ,true,true);
+				items[0] = new DialogGUILabel("<size=15><b>"+pcm.name+"</b></size>" + (isTourist?"<size=10> "+ Localizer.Format("#autoLOC_AirlockPlusAP002") +"</size>":""),true,false);
 				items[1] = new DialogGUIButton("<size=14>"+ Localizer.Format("#autoLOC_AirlockPlusAP003") +"</size>",delegate{onBtnEVA(pcm);},48,24,true,null);
 				// TODO: grayed out button: this isn't going to work outside of a PopupDialog =(
 				//if (isTourist) items[1].OptionEnabledCondition = ()=>false;
