@@ -34,10 +34,12 @@ namespace AirlockPlus
 		private static float RAYCAST_DIST = 100f;
 		private RaycastHit hit;
 
-		// selected airlock part
+		// selected airlock and part
+		private Collider airlock;
 		private Part airlockPart;
 
 		// hijacking the CrewHatchDialog to display alternative crew list
+		private bool modclick = false;
 		private bool hijack = false;
 		private CrewHatchDialog chd;
 		// HACK: check if stock KSP is done populating CrewHatchDialog before hijacking it
@@ -63,10 +65,12 @@ namespace AirlockPlus
 
 			// Note: ControlTypes.KEYBOARDINPUT is locked when vessel lacks control.
 			// So we cannot gate this mod+click behind InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT)
-			if (modkey.GetKey() && Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left)) {
-				if ( Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
+			if (Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left) && FlightUIModeController.Instance.Mode != FlightUIMode.ORBITAL) {
+				modclick = modkey.GetKey();
+				if ( (modclick || useCTI) && Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
 					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
-						Debug.Log("[AirlockPlus] INFO: mod+click detected on airlock, standing by to hijack CrewHatchDialog.");
+						Debug.Log("[AirlockPlus] INFO: " + (modclick?"mod+":"") + "click detected on airlock, standing by to hijack CrewHatchDialog.");
+						airlock = hit.collider;
 						hijack = true;
 						chd = null;
 						frame = 0;
@@ -105,10 +109,33 @@ namespace AirlockPlus
 				return;
 
 			// stock KSP done setting up CrewHatchDialog contents, proceed with hijacking
-			airlockPart = hit.collider.GetComponentInParent<Part>();
-			Debug.Log("[AirlockPlus] INFO: hijacking CrewHatchDialog for airlock " + hit.collider.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
+			airlockPart = airlock.GetComponentInParent<Part>();
+			if (modclick) doHijack();
+			else doAugment();
 			hijack = false;
 			frame = 0;
+		}
+
+		private void doAugment() {
+			Debug.Log("[AirlockPlus] INFO: augmenting CrewHatchDialog for airlock " + airlock.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
+
+			// Content transform of Scroll View
+			Transform listContainer = chd.GetComponentInChildren<ContentSizeFitter>().transform;
+			// Add icons
+			for (int i = listContainer.childCount-1; i > 0; i--) {
+				GameObject icon = CTIWrapper.CTI.getTrait( listContainer.GetChild(i).GetComponent<CrewHatchDialogWidget>().protoCrewMember.experienceTrait.TypeName ).makeGameObject();
+				LayoutElement elem = icon.AddComponent<LayoutElement>();
+				elem.minWidth = elem.minHeight = elem.preferredWidth = elem.preferredHeight = 20;
+				icon.transform.SetParent(listContainer.GetChild(i).transform,false);
+				icon.transform.SetAsFirstSibling();
+				icon.SetActive(true);
+			}
+
+			chd = null;
+		}
+
+		private void doHijack() {
+			Debug.Log("[AirlockPlus] INFO: hijacking CrewHatchDialog for airlock " + airlock.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
 
 			// TextHeader
 			chd.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlus00000");
@@ -198,9 +225,10 @@ namespace AirlockPlus
 			Part kerbalPart = pcm.KerbalRef.InPart;
 			Vector3 original = kerbalPart.transform.position;
 			kerbalPart.transform.position = airlockPart.transform.position;
-			FlightEVA.fetch.spawnEVA(pcm,kerbalPart,hit.collider.transform);
+			FlightEVA.fetch.spawnEVA(pcm,kerbalPart,airlock.transform);
 			kerbalPart.transform.position = original;
 
+			airlock = null;
 			airlockPart = null;
 		}
 		#endregion
