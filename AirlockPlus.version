@@ -1,0 +1,31 @@
+{
+	"NAME":"AirlockPlus",
+	"URL":"https://raw.githubusercontent.com/cake-pie/AirlockPlus/master/AirlockPlus.version",
+	"DOWNLOAD":"https://github.com/cake-pie/AirlockPlus/releases",
+	"GITHUB":{
+		"USERNAME":"cake-pie",
+		"REPOSITORY":"AirlockPlus",
+		"ALLOW_PRE_RELEASE":false,
+	},
+	"VERSION":{
+		"MAJOR":0,
+		"MINOR":0,
+		"PATCH":9,
+		"BUILD":0
+	},
+	"KSP_VERSION":{
+		"MAJOR":1,
+		"MINOR":3,
+		"PATCH":0
+	},
+	"KSP_VERSION_MIN":{
+		"MAJOR":1,
+		"MINOR":3,
+		"PATCH":0
+	},
+	"KSP_VERSION_MAX":{
+		"MAJOR":1,
+		"MINOR":3,
+		"PATCH":8
+	}
+}
