@@ -50,6 +50,9 @@ namespace AirlockPlus
 
 		// CLS support
 		internal static bool useCLS = false;
+
+		// CTI support
+		internal static bool useCTI = false;
 		#endregion
 
 		#region Input / UI
@@ -155,14 +158,11 @@ namespace AirlockPlus
 				return;
 
 			foreach (ProtoCrewMember pcm in p.protoModuleCrew) {
-				bool isTourist = (pcm.type == ProtoCrewMember.KerbalType.Tourist);
-
-				DialogGUIBase[] items = new DialogGUIBase[2];
-				items[0] = new DialogGUILabel("<size=15><b>"+pcm.name+"</b></size>" + (isTourist?"<size=10> "+ Localizer.Format("#autoLOC_AirlockPlusAP002") +"</size>":""),true,false);
-				items[1] = new DialogGUIButton("<size=14>"+ Localizer.Format("#autoLOC_AirlockPlusAP003") +"</size>",delegate{onBtnEVA(pcm);},48,24,true,null);
-				// TODO: grayed out button: this isn't going to work outside of a PopupDialog =(
-				//if (isTourist) items[1].OptionEnabledCondition = ()=>false;
-				DialogGUIHorizontalLayout h = new DialogGUIHorizontalLayout(false,false,0f,new RectOffset(4,0,0,0),TextAnchor.MiddleLeft,items);
+				List<DialogGUIBase> items = new List<DialogGUIBase>();
+				if (useCTI) items.Add(CTIWrapper.CTI.getTrait(pcm.experienceTrait.TypeName).makeDialogGUIImage(new Vector2(20,20),new Vector2()));
+				items.Add(new DialogGUILabel("<size=15><b>"+pcm.name+"</b></size>" + ((!useCTI && pcm.type == ProtoCrewMember.KerbalType.Tourist)?"<size=10> "+ Localizer.Format("#autoLOC_AirlockPlusAP002") +"</size>":""),true,false));
+				items.Add(new DialogGUIButton("<size=14>"+ Localizer.Format("#autoLOC_AirlockPlusAP003") +"</size>",delegate{onBtnEVA(pcm);},48,24,true,null));
+				DialogGUIHorizontalLayout h = new DialogGUIHorizontalLayout(false,false,0f,new RectOffset(4,0,0,0),TextAnchor.MiddleLeft,items.ToArray());
 				Stack<Transform> layouts = new Stack<Transform>();
 				layouts.Push(listContainer);
 				GameObject go = h.Create(ref layouts, HighLogic.UISkin);
@@ -214,6 +214,10 @@ namespace AirlockPlus
 			// CLS support
 			useCLS = CLSClient.CLSInstalled;
 			Debug.Log("[AirlockPlus] INFO: CLS support is " + (useCLS?"on":"off"));
+
+			// CTI support
+			useCTI = CTIWrapper.initCTIWrapper() && CTIWrapper.CTI.Loaded;
+			Debug.Log("[AirlockPlus] INFO: CTI support is " + (useCTI?"on":"off"));
 		}
 		#endregion
 	}
