@@ -63,17 +63,20 @@ namespace AirlockPlus
 			if (hijack)
 				considerHijack();
 
-			// Note: ControlTypes.KEYBOARDINPUT is locked when vessel lacks control.
-			// So we cannot gate this mod+click behind InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT)
 			if (Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left) && FlightUIModeController.Instance.Mode != FlightUIMode.ORBITAL) {
 				modclick = modkey.GetKey();
 				if ( (modclick || useCTI) && Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
 					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
-						Debug.Log("[AirlockPlus] INFO: " + (modclick?"mod+":"") + "click detected on airlock, standing by to hijack CrewHatchDialog.");
-						airlock = hit.collider;
-						hijack = true;
-						chd = null;
-						frame = 0;
+						if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
+							Debug.Log("[AirlockPlus] INFO: " + (modclick?"mod+":"") + "click detected on airlock, but input lock is active.");
+							Debug.Log(InputLockManager.PrintLockStack());
+						} else {
+							Debug.Log("[AirlockPlus] INFO: " + (modclick?"mod+":"") + "click detected on airlock, standing by to hijack CrewHatchDialog.");
+							airlock = hit.collider;
+							hijack = true;
+							chd = null;
+							frame = 0;
+						}
 					}
 				}
 			}

@@ -114,10 +114,22 @@ namespace AirlockPlus
 					BoardManualSel();
 			}
 			else {
-				if ( InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT) && Input.GetKey(KeyCode.LeftShift) && boardkey.GetKeyUp() )
-					_BoardAuto();
-				if ( InputLockManager.IsUnlocked(ControlTypes.KEYBOARDINPUT) && Input.GetKey(KeyCode.LeftControl) && boardkey.GetKeyUp() )
-					BoardManual();
+				if ( Input.GetKey(KeyCode.LeftShift) && boardkey.GetKeyUp() ) {
+					if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
+						Debug.Log("[AirlockPlus|BoardingPass] INFO: shift+board detected, but input lock is active.");
+						Debug.Log(InputLockManager.PrintLockStack());
+					} else {
+						_BoardAuto();
+					}
+				}
+				if ( Input.GetKey(KeyCode.LeftControl) && boardkey.GetKeyUp() ) {
+					if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
+						Debug.Log("[AirlockPlus|BoardingPass] INFO: ctrl+board detected, but input lock is active.");
+						Debug.Log(InputLockManager.PrintLockStack());
+					} else {
+						BoardManual();
+					}
+				}
 			}
 		}
 
