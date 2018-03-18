@@ -126,7 +126,7 @@ namespace AirlockPlus
 			Transform listContainer = chd.GetComponentInChildren<ContentSizeFitter>().transform;
 			// Add icons
 			for (int i = listContainer.childCount-1; i > 0; i--) {
-				GameObject icon = CTIWrapper.CTI.getTrait( listContainer.GetChild(i).GetComponent<CrewHatchDialogWidget>().protoCrewMember.experienceTrait.TypeName ).makeGameObject();
+				GameObject icon = CTIWrapper.CTI.getTrait( listContainer.GetChild(i).GetComponent<CrewHatchDialogWidget>().protoCrewMember.experienceTrait.Config.Name ).makeGameObject();
 				LayoutElement elem = icon.AddComponent<LayoutElement>();
 				elem.minWidth = elem.minHeight = elem.preferredWidth = elem.preferredHeight = 20;
 				icon.transform.SetParent(listContainer.GetChild(i).transform,false);
@@ -189,7 +189,7 @@ namespace AirlockPlus
 
 			foreach (ProtoCrewMember pcm in p.protoModuleCrew) {
 				List<DialogGUIBase> items = new List<DialogGUIBase>();
-				if (useCTI) items.Add(CTIWrapper.CTI.getTrait(pcm.experienceTrait.TypeName).makeDialogGUIImage(new Vector2(20,20),new Vector2()));
+				if (useCTI) items.Add(CTIWrapper.CTI.getTrait(pcm.experienceTrait.Config.Name).makeDialogGUIImage(new Vector2(20,20),new Vector2()));
 				items.Add(new DialogGUILabel("<size=15><b>"+pcm.name+"</b></size>" + ((!useCTI && pcm.type == ProtoCrewMember.KerbalType.Tourist)?"<size=10> "+ Localizer.Format("#autoLOC_AirlockPlusAP002") +"</size>":""),true,false));
 				items.Add(new DialogGUIButton("<size=14>"+ Localizer.Format("#autoLOC_AirlockPlusAP003") +"</size>",delegate{onBtnEVA(pcm);},48,24,true,null));
 				DialogGUIHorizontalLayout h = new DialogGUIHorizontalLayout(false,false,0f,new RectOffset(4,0,0,0),TextAnchor.MiddleLeft,items.ToArray());
