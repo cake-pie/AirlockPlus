@@ -290,7 +290,7 @@ namespace AirlockPlus
 		private void CLSBoardAuto() {
 			Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " auto boarding " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
 
-			ICLSSpace clsSpace = CLSClient.GetCLS().getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space;
+			ICLSSpace clsSpace = AirlockPlus.CLS.getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space;
 
 			// check in case of full vessel first
 			if (clsSpace.Crew.Count >= clsSpace.MaxCrew) {
@@ -328,7 +328,7 @@ namespace AirlockPlus
 
 		private void CLSBoardManualListParts() {
 			Part p;
-			foreach (ICLSPart clsp in CLSClient.GetCLS().getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space.Parts) {
+			foreach (ICLSPart clsp in AirlockPlus.CLS.getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space.Parts) {
 				p = clsp.Part;
 				if (p.CrewCapacity>0) {
 					highlightParts.Add(p.flightID,p);
@@ -368,7 +368,7 @@ namespace AirlockPlus
 			MapView.OnExitMapView += OnExitMap;
 
 			// CLS support
-			if (CLSClient.CLSInstalled) {
+			if (AirlockPlus.useCLS) {
 				Debug.Log("[AirlockPlus|BoardingPass] INFO: CLS support enabled.");
 				scrmsgVesFull.message = Localizer.Format("#autoLOC_AirlockPlusBP002c");
 				_BoardAuto = CLSBoardAuto;

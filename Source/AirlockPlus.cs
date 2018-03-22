@@ -52,6 +52,7 @@ namespace AirlockPlus
 
 		// CLS support
 		internal static bool useCLS = false;
+		internal static ICLSAddon CLS = null;
 
 		// CTI support
 		internal static bool useCTI = false;
@@ -162,7 +163,7 @@ namespace AirlockPlus
 
 			if (useCLS) {
 				// Crew in other parts
-				ICLSSpace clsSpace = CLSClient.GetCLS().getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
+				ICLSSpace clsSpace = CLS.getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
 				foreach (ICLSPart p in clsSpace.Parts) {
 					if (p.Part != airlockPart)
 						addCrewToList(listContainer.transform, p.Part);
@@ -243,7 +244,7 @@ namespace AirlockPlus
 			Debug.Log("[AirlockPlus] INFO: MODIFIER_KEY key is " + modkey.primary.ToString());
 
 			// CLS support
-			useCLS = CLSClient.CLSInstalled;
+			useCLS = ( CLS = CLSClient.GetCLS() ) != null;
 			Debug.Log("[AirlockPlus] INFO: CLS support is " + (useCLS?"on":"off"));
 
 			// CTI support
