@@ -40,4 +40,4 @@ Translation Credits
 * Rezza Goan [[forum](https://forum.kerbalspaceprogram.com/index.php?/profile/186644-rezza-goan/) / [github](https://github.com/Rezzagoan)]
 
 **Italian**
-* Proofreader wanted!
+* Simog [[forum](https://forum.kerbalspaceprogram.com/index.php?/profile/179328-simog/)]
