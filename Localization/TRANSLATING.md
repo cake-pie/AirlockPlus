@@ -29,3 +29,15 @@ Translation Credits
 
 **Spanish**
 * GonDragon [[forum](http://forum.kerbalspaceprogram.com/index.php?/profile/174274-gondragon/) / [github](https://github.com/GonDragon)]
+
+**German**
+* Nils277 [[forum](https://forum.kerbalspaceprogram.com/index.php?/profile/122414-nils277/) / [github](https://github.com/Nils277)]
+
+**Portuguese**
+* Spricigo [[forum](https://forum.kerbalspaceprogram.com/index.php?/profile/166502-spricigo/)]
+
+**French**
+* Rezza Goan [[forum](https://forum.kerbalspaceprogram.com/index.php?/profile/186644-rezza-goan/) / [github](https://github.com/Rezzagoan)]
+
+**Italian**
+* Proofreader wanted!
