@@ -149,7 +149,8 @@ namespace AirlockPlus
 			ScreenMessages.RemoveMessage(scrmsgPartSelect);
 			ScreenMessages.RemoveMessage(scrmsgPartFull);
 
-			ScreenMessages.PostScreenMessage(scrmsgKeys);
+			if (AirlockPlus.boardingScreenMessages)
+				ScreenMessages.PostScreenMessage(scrmsgKeys);
 		}
 
 		// HACK: turn off stock command hints while in manual boarding mode

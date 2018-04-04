@@ -47,15 +47,18 @@ namespace AirlockPlus
 		// We need to wait for stock KSP to finish populating the CrewHatchDialog, otherwise it will overwrite our stuff (instead of the other way round).
 		// Absent of any formal indication that CrewHatchDialog is "done populating", we will need to jump through a few hoops to accomplish this.
 		private int frame = 0;
-		private static readonly int FRAMEWAIT = 5;
+		private static int framewait = 5;
 		private static readonly string CHD_NOTREADY_HEADER = "Part Title Crew";
 
+		// BoardingPass ScreenMessages setting
+		internal static bool boardingScreenMessages = true;
+
 		// CLS support
-		internal static bool useCLS = false;
+		internal static bool useCLS = true;
 		internal static ICLSAddon CLS = null;
 
 		// CTI support
-		internal static bool useCTI = false;
+		internal static bool useCTI = true;
 		#endregion
 
 		#region Input / UI
@@ -89,8 +92,8 @@ namespace AirlockPlus
 
 			// can't do anything if CrewHatchController isn't active yet
 			if (!CrewHatchController.fetch.Active) {
-				// abort if CrewHatchController still isn't active after FRAMEWAIT -- e.g. player may have cancelled by clicking elsewhere
-				if (frame > FRAMEWAIT) {
+				// abort if CrewHatchController still isn't active after framewait -- e.g. player may have cancelled by clicking elsewhere
+				if (frame >= framewait) {
 					Debug.Log("[AirlockPlus] INFO: CrewHatchController is still inactive, aborting hijack.");
 					hijack = false;
 					chd = null;
@@ -243,8 +246,16 @@ namespace AirlockPlus
 			modkey = GameSettings.MODIFIER_KEY;
 			Debug.Log("[AirlockPlus] INFO: MODIFIER_KEY key is " + modkey.primary.ToString());
 
+			ConfigNode node = GameDatabase.Instance.GetConfigNode("AirlockPlus/Settings/AirlockPlusSettings");
+			if (node != null) {
+				Debug.Log("[AirlockPlus] INFO: reading settings file...\n" + node);
+				node.TryGetValue("framewait", ref framewait);
+				node.TryGetValue("boardingScreenMessages", ref boardingScreenMessages);
+				node.TryGetValue("useCLS", ref useCLS);
+			}
+
 			// CLS support
-			useCLS = ( CLS = CLSClient.GetCLS() ) != null;
+			if (useCLS) useCLS = ( CLS = CLSClient.GetCLS() ) != null;
 			Debug.Log("[AirlockPlus] INFO: CLS support is " + (useCLS?"on":"off"));
 
 			// CTI support
