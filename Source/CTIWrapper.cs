@@ -1,3 +1,28 @@
+#region license
+/*The MIT License (MIT)
+
+Copyright (c) 2015-2018 cake>pie et al.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+*/
+#endregion
+
 using System;
 using System.Linq;
 using System.Reflection;
@@ -91,6 +116,7 @@ namespace AirlockPlus
 				_makeDialogGUIImage = KerbalTraitSettingType.GetMethod("makeDialogGUIImage", BindingFlags.Public | BindingFlags.Instance);
 				_makeDialogGUISprite = KerbalTraitSettingType.GetMethod("makeDialogGUISprite", BindingFlags.Public | BindingFlags.Instance);
 				_makeGameObject = KerbalTraitSettingType.GetMethod("makeGameObject", BindingFlags.Public | BindingFlags.Instance);
+				_attachImage = KerbalTraitSettingType.GetMethod("attachImage", BindingFlags.Public | BindingFlags.Instance);
 			}
 
 			private object _actualKerbalTraitSetting;
@@ -116,11 +142,11 @@ namespace AirlockPlus
 			}
 
 			private PropertyInfo _Color;
-			public Color? Color
+			public Color Color
 			{
 				get
 				{
-					if (_Color == null) return null;
+					if (_Color == null) return Color.white;
 					return (Color)_Color.GetValue(_actualKerbalTraitSetting, null);
 				}
 			}
@@ -154,11 +180,19 @@ namespace AirlockPlus
 				if (_makeGameObject == null) return null;
 				return (GameObject)_makeGameObject.Invoke(_actualKerbalTraitSetting, null);
 			}
+
+			private MethodInfo _attachImage;
+			public bool attachImage(GameObject go)
+			{
+				if (_attachImage == null) return false;
+				object[] paramArr = new object[] { go };
+				return (bool)_attachImage.Invoke(_actualKerbalTraitSetting, paramArr);
+			}
 		}
 
 		private static void log(string s, params object[] m)
 		{
-			Debug.Log(string.Format("[CTIWrapper] " + s, m));
+			Debug.Log(string.Format("[" + typeof(CTIWrapper).Namespace + "|CTIWrapper] " + s, m));
 		}
 	}
 }
