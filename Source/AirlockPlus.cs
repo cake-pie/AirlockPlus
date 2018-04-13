@@ -188,7 +188,7 @@ namespace AirlockPlus
 		}
 
 		private void addCrewToList(Transform listContainer, Part p) {
-			if (p.CrewCapacity == 0 || p.protoModuleCrew.Count == 0)
+			if (p.CrewCapacity == 0 || p.protoModuleCrew.Count == 0 || p.Modules.Contains<KerbalEVA>())
 				return;
 
 			foreach (ProtoCrewMember pcm in p.protoModuleCrew) {
