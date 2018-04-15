@@ -13,7 +13,7 @@ using ConnectedLivingSpace;
 
 namespace AirlockPlus
 {
-	// Provides enhanced vessel alighting features on top of stock CrewHatchController et al
+	// Provides enhanced vessel alighting features on top of stock CrewHatchController & CrewHatchDialog
 	[KSPAddon(KSPAddon.Startup.Flight, false)]
 	public sealed class AirlockPlus : MonoBehaviour
 	{
@@ -45,7 +45,7 @@ namespace AirlockPlus
 		// HACK: check if stock KSP is done populating CrewHatchDialog before hijacking it
 		// It takes stock KSP an inconsistent amount of time to activate CrewHatchController, and then spawn and populate the CrewHatchDialog.
 		// We need to wait for stock KSP to finish populating the CrewHatchDialog, otherwise it will overwrite our stuff (instead of the other way round).
-		// Absent of any formal indication that CrewHatchDialog is "done populating", we will need to jump through a few hoops to accomplish this.
+		// Lacking any formal indication that CrewHatchDialog is "done populating", we resort to testing if the dialog header has changed from its placeholder value.
 		private int frame = 0;
 		private static int framewait = 5;
 		private static readonly string CHD_NOTREADY_HEADER = "Part Title Crew";
