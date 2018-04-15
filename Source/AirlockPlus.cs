@@ -211,6 +211,9 @@ namespace AirlockPlus
 			CrewHatchController.fetch.DisableInterface();
 			CrewHatchController.fetch.EnableInterface();
 
+			Part kerbalPart = pcm.KerbalRef.InPart;
+			Debug.Log("[AirlockPlus] INFO: EVA button pressed; " + pcm.name + " in part " + kerbalPart.partInfo.name + " of " + airlockPart.vessel.vesselName + " attempting to exit via airlock " +  airlock.gameObject.name + " on part " + airlockPart.partInfo.name);
+
 			// sanity checks, in case of unexpected death, destruction or separation
 			if (pcm.rosterStatus != ProtoCrewMember.RosterStatus.Assigned || pcm.inactive || pcm.outDueToG) return;
 			if (airlockPart.State == PartStates.DEAD || pcm.KerbalRef.InVessel != airlockPart.vessel) return;
@@ -229,10 +232,11 @@ namespace AirlockPlus
 			// spawnEVA assumes fromPart corresponds to fromAirlock; these are passed on to FlightEVA.HatchIsObstructed
 			// Using a different fromPart than what stock expects can lead to spurious results when checking hatches for obstruction
 			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects...
-			Part kerbalPart = pcm.KerbalRef.InPart;
 			Vector3 original = kerbalPart.transform.position;
 			kerbalPart.transform.position = airlockPart.transform.position;
+			Debug.Log("[AirlockPlus] DEBUG: Spawning EVA...");
 			FlightEVA.fetch.spawnEVA(pcm,kerbalPart,airlock.transform);
+			Debug.Log("[AirlockPlus] DEBUG: EVA spawned.");
 			kerbalPart.transform.position = original;
 
 			airlock = null;
