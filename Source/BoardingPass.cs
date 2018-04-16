@@ -17,6 +17,7 @@ namespace AirlockPlus
 		// screen messages
 		private static ScreenMessage scrmsgKeys       = new ScreenMessage( Localizer.Format("#autoLOC_AirlockPlusBP001","B") , float.MaxValue, ScreenMessageStyle.LOWER_CENTER);
 		private static ScreenMessage scrmsgVesFull    = new ScreenMessage( Localizer.Format("#autoLOC_AirlockPlusBP002") , 5f, ScreenMessageStyle.UPPER_CENTER);
+		private static ScreenMessage scrmsgCLSFull    = new ScreenMessage( Localizer.Format("#autoLOC_AirlockPlusBP002c") , 5f, ScreenMessageStyle.UPPER_CENTER);
 		private static ScreenMessage scrmsgPartSelect = new ScreenMessage( Localizer.Format("#autoLOC_AirlockPlusBP003","#00f9ea") , 15f, ScreenMessageStyle.UPPER_CENTER);
 		private static ScreenMessage scrmsgPartFull   = new ScreenMessage( Localizer.Format("#autoLOC_111558") , 3f, ScreenMessageStyle.UPPER_CENTER);
 
@@ -137,6 +138,7 @@ namespace AirlockPlus
 			if (tgtAirlockPart == null) {
 				ScreenMessages.RemoveMessage(scrmsgKeys);
 				ScreenMessages.RemoveMessage(scrmsgVesFull);
+				ScreenMessages.RemoveMessage(scrmsgCLSFull);
 				ScreenMessages.RemoveMessage(scrmsgPartSelect);
 				ScreenMessages.RemoveMessage(scrmsgPartFull);
 				return;
@@ -144,6 +146,7 @@ namespace AirlockPlus
 			if (manualBoarding) {
 				ScreenMessages.RemoveMessage(scrmsgKeys);
 				ScreenMessages.RemoveMessage(scrmsgVesFull);
+				ScreenMessages.RemoveMessage(scrmsgCLSFull);
 				return;
 			}
 			ScreenMessages.RemoveMessage(scrmsgPartSelect);
@@ -289,6 +292,11 @@ namespace AirlockPlus
 		}
 
 		private void CLSBoardAuto() {
+			if (AirlockPlus.CLS.AllowUnrestrictedTransfers) {
+				BoardAuto();
+				return;
+			}
+
 			Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " auto boarding " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
 
 			ICLSSpace clsSpace = AirlockPlus.CLS.getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space;
@@ -296,7 +304,7 @@ namespace AirlockPlus
 			// check in case of full vessel first
 			if (clsSpace.Crew.Count >= clsSpace.MaxCrew) {
 				Debug.Log("[AirlockPlus|BoardingPass] INFO: Auto boarding failed - CLS space full");
-				ScreenMessages.PostScreenMessage(scrmsgVesFull);
+				ScreenMessages.PostScreenMessage(scrmsgCLSFull);
 
 				// HACK: temporarily disable KerbalEVA for one update frame to prevent stock boarding from being registered alongside auto boarding
 				// this prevents "spurious" stock "Cannot board a full module" message appearing alongside our auto boarding "Cannot board a full vessel"
@@ -328,6 +336,11 @@ namespace AirlockPlus
 		}
 
 		private void CLSBoardManualListParts() {
+			if (AirlockPlus.CLS.AllowUnrestrictedTransfers) {
+				BoardManualListParts();
+				return;
+			}
+
 			Part p;
 			foreach (ICLSPart clsp in AirlockPlus.CLS.getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space.Parts) {
 				p = clsp.Part;
@@ -371,7 +384,6 @@ namespace AirlockPlus
 			// CLS support
 			if (AirlockPlus.useCLS) {
 				Debug.Log("[AirlockPlus|BoardingPass] INFO: CLS support enabled.");
-				scrmsgVesFull.message = Localizer.Format("#autoLOC_AirlockPlusBP002c");
 				_BoardAuto = CLSBoardAuto;
 				_BoardManualListParts = CLSBoardManualListParts;
 			}

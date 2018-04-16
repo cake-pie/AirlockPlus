@@ -164,7 +164,7 @@ namespace AirlockPlus
 			// Crew in airlock part
 			addCrewToList(listContainer, airlockPart);
 
-			if (useCLS) {
+			if (useCLS && !CLS.AllowUnrestrictedTransfers) {
 				// Crew in other parts
 				ICLSSpace clsSpace = CLS.getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
 				foreach (ICLSPart p in clsSpace.Parts) {
