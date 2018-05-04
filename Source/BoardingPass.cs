@@ -251,7 +251,7 @@ namespace AirlockPlus
 		private void BoardManualSel() {
 			if (!highlightParts.ContainsKey(lastHovered.flightID)) return;
 			if (SpaceAvail(lastHovered)) {
-				Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " manually boarding " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
+				Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " manually boarding " + lastHovered.partInfo.name + " of " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
 				keva.BoardPart(lastHovered);
 			}
 			else
