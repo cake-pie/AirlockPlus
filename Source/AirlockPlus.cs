@@ -234,9 +234,11 @@ namespace AirlockPlus
 			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects...
 			Vector3 original = kerbalPart.transform.position;
 			kerbalPart.transform.position = airlockPart.transform.position;
-			Debug.Log("[AirlockPlus] DEBUG: Spawning EVA...");
-			FlightEVA.fetch.spawnEVA(pcm,kerbalPart,airlock.transform);
-			Debug.Log("[AirlockPlus] DEBUG: EVA spawned.");
+			Debug.Log("[AirlockPlus] DEBUG: Attempting to spawn EVA...");
+			if ( FlightEVA.fetch.spawnEVA(pcm,kerbalPart,airlock.transform) != null )
+				Debug.Log("[AirlockPlus] DEBUG: EVA spawned.");
+			else
+				Debug.Log("[AirlockPlus] DEBUG: spawnEVA failed.");
 			kerbalPart.transform.position = original;
 
 			airlock = null;
