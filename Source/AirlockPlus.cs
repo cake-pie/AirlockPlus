@@ -72,10 +72,10 @@ namespace AirlockPlus
 				if ( (modclick || useCTI) && Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
 					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
 						if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
-							Debug.Log("[AirlockPlus] INFO: " + (modclick?"mod+":"") + "click detected on airlock, but input lock is active.");
+							Log($"INFO: {(modclick?"mod+":"")}click detected on airlock, but input lock is active.");
 							Debug.Log(InputLockManager.PrintLockStack());
 						} else {
-							Debug.Log("[AirlockPlus] INFO: " + (modclick?"mod+":"") + "click detected on airlock, standing by to hijack CrewHatchDialog.");
+							Log($"INFO: {(modclick?"mod+":"")}click detected on airlock, standing by to hijack CrewHatchDialog.");
 							airlock = hit.collider;
 							hijack = true;
 							chd = null;
@@ -88,13 +88,13 @@ namespace AirlockPlus
 
 		private void considerHijack() {
 			frame++;
-			Debug.Log("[AirlockPlus] INFO: considering hijack @ frame +" + frame);
+			Log("INFO: considering hijack @ frame +" + frame);
 
 			// can't do anything if CrewHatchController isn't active yet
 			if (!CrewHatchController.fetch.Active) {
 				// abort if CrewHatchController still isn't active after framewait -- e.g. player may have cancelled by clicking elsewhere
 				if (frame >= framewait) {
-					Debug.Log("[AirlockPlus] INFO: CrewHatchController is still inactive, aborting hijack.");
+					Log("INFO: CrewHatchController is still inactive, aborting hijack.");
 					hijack = false;
 					chd = null;
 					frame = 0;
@@ -106,7 +106,7 @@ namespace AirlockPlus
 			if (chd == null) {
 				chd = CrewHatchController.fetch.CrewDialog;
 				if (chd == null) {
-					Debug.Log("[AirlockPlus] ERROR: failed to obtain CrewHatchDialog.");
+					Log("ERROR: failed to obtain CrewHatchDialog.");
 					return;
 				}
 			}
@@ -124,7 +124,7 @@ namespace AirlockPlus
 		}
 
 		private void doAugment() {
-			Debug.Log("[AirlockPlus] INFO: augmenting CrewHatchDialog for airlock " + airlock.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
+			Log($"INFO: augmenting CrewHatchDialog for airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name} of {airlockPart.vessel.vesselName}");
 
 			// Content transform of Scroll View
 			Transform listContainer = chd.GetComponentInChildren<ContentSizeFitter>().transform;
@@ -142,7 +142,7 @@ namespace AirlockPlus
 		}
 
 		private void doHijack() {
-			Debug.Log("[AirlockPlus] INFO: hijacking CrewHatchDialog for airlock " + airlock.gameObject.name + " on part " + airlockPart.partInfo.name + " of " + airlockPart.vessel.vesselName);
+			Log($"INFO: hijacking CrewHatchDialog for airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name} of {airlockPart.vessel.vesselName}");
 
 			// TextHeader
 			chd.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlus00000");
@@ -212,7 +212,7 @@ namespace AirlockPlus
 			CrewHatchController.fetch.EnableInterface();
 
 			Part kerbalPart = pcm.KerbalRef.InPart;
-			Debug.Log("[AirlockPlus] INFO: EVA button pressed; " + pcm.name + " in part " + kerbalPart.partInfo.name + " of " + airlockPart.vessel.vesselName + " attempting to exit via airlock " +  airlock.gameObject.name + " on part " + airlockPart.partInfo.name);
+			Log($"INFO: EVA button pressed; {pcm.name} in part {kerbalPart.partInfo.name} of {airlockPart.vessel.vesselName} attempting to exit via airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name}");
 
 			// sanity checks, in case of unexpected death, destruction or separation
 			if (pcm.rosterStatus != ProtoCrewMember.RosterStatus.Assigned || pcm.inactive || pcm.outDueToG) return;
@@ -234,11 +234,11 @@ namespace AirlockPlus
 			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects...
 			Vector3 original = kerbalPart.transform.position;
 			kerbalPart.transform.position = airlockPart.transform.position;
-			Debug.Log("[AirlockPlus] DEBUG: Attempting to spawn EVA...");
+			Log("DEBUG: Attempting to spawn EVA...");
 			if ( FlightEVA.fetch.spawnEVA(pcm,kerbalPart,airlock.transform) != null )
-				Debug.Log("[AirlockPlus] DEBUG: EVA spawned.");
+				Log("DEBUG: EVA spawned.");
 			else
-				Debug.Log("[AirlockPlus] DEBUG: spawnEVA failed.");
+				Log("DEBUG: spawnEVA failed.");
 			kerbalPart.transform.position = original;
 
 			airlock = null;
@@ -248,13 +248,13 @@ namespace AirlockPlus
 
 		#region MonoBehaviour life cycle
 		private void Start() {
-			Debug.Log("[AirlockPlus] INFO: Starting AirlockPlus...");
+			Log("INFO: Starting AirlockPlus...");
 			modkey = GameSettings.MODIFIER_KEY;
-			Debug.Log("[AirlockPlus] INFO: MODIFIER_KEY key is " + modkey.primary.ToString());
+			Log("INFO: MODIFIER_KEY key is " + modkey.primary.ToString());
 
 			ConfigNode node = GameDatabase.Instance.GetConfigNode("AirlockPlus/Settings/AirlockPlusSettings");
 			if (node != null) {
-				Debug.Log("[AirlockPlus] INFO: reading settings file...\n" + node);
+				Log("INFO: reading settings file...\n" + node);
 				node.TryGetValue("framewait", ref framewait);
 				node.TryGetValue("boardingScreenMessages", ref boardingScreenMessages);
 				node.TryGetValue("useCLS", ref useCLS);
@@ -262,12 +262,16 @@ namespace AirlockPlus
 
 			// CLS support
 			if (useCLS) useCLS = ( CLS = CLSClient.GetCLS() ) != null;
-			Debug.Log("[AirlockPlus] INFO: CLS support is " + (useCLS?"on":"off"));
+			Log("INFO: CLS support is " + (useCLS?"on":"off"));
 
 			// CTI support
 			useCTI = CTIWrapper.initCTIWrapper() && CTIWrapper.CTI.Loaded;
-			Debug.Log("[AirlockPlus] INFO: CTI support is " + (useCTI?"on":"off"));
+			Log("INFO: CTI support is " + (useCTI?"on":"off"));
 		}
 		#endregion
+
+		private void Log(string s) {
+			Debug.Log("[AirlockPlus] " + s);
+		}
 	}
 }

@@ -117,7 +117,7 @@ namespace AirlockPlus
 			else {
 				if ( Input.GetKey(KeyCode.LeftShift) && boardkey.GetKeyUp() ) {
 					if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
-						Debug.Log("[AirlockPlus|BoardingPass] INFO: shift+board detected, but input lock is active.");
+						Log("INFO: shift+board detected, but input lock is active.");
 						Debug.Log(InputLockManager.PrintLockStack());
 					} else {
 						_BoardAuto();
@@ -125,7 +125,7 @@ namespace AirlockPlus
 				}
 				if ( Input.GetKey(KeyCode.LeftControl) && boardkey.GetKeyUp() ) {
 					if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
-						Debug.Log("[AirlockPlus|BoardingPass] INFO: ctrl+board detected, but input lock is active.");
+						Log("INFO: ctrl+board detected, but input lock is active.");
 						Debug.Log(InputLockManager.PrintLockStack());
 					} else {
 						BoardManual();
@@ -181,11 +181,11 @@ namespace AirlockPlus
 
 		#region Boarding Logic
 		private void BoardAuto() {
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " auto boarding " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
+			Log($"INFO: {vessel.vesselName} auto boarding {tgtAirlockPart.vessel.vesselName} via {tgtAirlockPart.partInfo.name}");
 
 			// check in case of full vessel first
 			if (tgtAirlockPart.vessel.GetCrewCount() >= tgtAirlockPart.vessel.GetCrewCapacity()) {
-				Debug.Log("[AirlockPlus|BoardingPass] INFO: Auto boarding failed - vessel full");
+				Log("INFO: Auto boarding failed - vessel full");
 				ScreenMessages.PostScreenMessage(scrmsgVesFull);
 
 				// HACK: temporarily disable KerbalEVA for one update frame to prevent stock boarding from being registered alongside auto boarding
@@ -210,7 +210,7 @@ namespace AirlockPlus
 				}
 			}
 			if (dest == null) {
-				Debug.Log("[AirlockPlus|BoardingPass] ERROR: Auto boarding target vessel at " + tgtAirlockPart.vessel.GetCrewCount() +"/"+ tgtAirlockPart.vessel.GetCrewCapacity() + "of capacity, but somehow unable to find a part with space?!");
+				Log($"ERROR: Auto boarding target vessel at {tgtAirlockPart.vessel.GetCrewCount()}/{tgtAirlockPart.vessel.GetCrewCapacity()} of capacity, but somehow unable to find a part with space?!");
 				return;
 			}
 
@@ -218,7 +218,7 @@ namespace AirlockPlus
 		}
 
 		private void BoardManual() {
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " manual boarding mode initiated for " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
+			Log($"INFO: {vessel.vesselName} manual boarding mode initiated for {tgtAirlockPart.vessel.vesselName} via {tgtAirlockPart.partInfo.name}");
 
 			// UI
 			ScreenMessages.PostScreenMessage(scrmsgPartSelect);
@@ -251,7 +251,7 @@ namespace AirlockPlus
 		private void BoardManualSel() {
 			if (!highlightParts.ContainsKey(lastHovered.flightID)) return;
 			if (SpaceAvail(lastHovered)) {
-				Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " manually boarding " + lastHovered.partInfo.name + " of " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
+				Log($"INFO: {vessel.vesselName} manually boarding {lastHovered.partInfo.name} of {tgtAirlockPart.vessel.vesselName} via {tgtAirlockPart.partInfo.name}");
 				keva.BoardPart(lastHovered);
 			}
 			else
@@ -259,7 +259,7 @@ namespace AirlockPlus
 		}
 
 		private void BoardManualCxl() {
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: Manual boarding mode terminated.");
+			Log("INFO: Manual boarding mode terminated.");
 			manualBoarding = false;
 			UpdateScreenMessages();
 
@@ -297,13 +297,13 @@ namespace AirlockPlus
 				return;
 			}
 
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: " + vessel.vesselName + " auto boarding " + tgtAirlockPart.vessel.vesselName + " via " + tgtAirlockPart.partInfo.name);
+			Log($"INFO: {vessel.vesselName} auto boarding {tgtAirlockPart.vessel.vesselName} via {tgtAirlockPart.partInfo.name}");
 
 			ICLSSpace clsSpace = AirlockPlus.CLS.getCLSVessel(tgtAirlockPart.vessel).Parts.Find(x => x.Part == tgtAirlockPart).Space;
 
 			// check in case of full vessel first
 			if (clsSpace.Crew.Count >= clsSpace.MaxCrew) {
-				Debug.Log("[AirlockPlus|BoardingPass] INFO: Auto boarding failed - CLS space full");
+				Log("INFO: Auto boarding failed - CLS space full");
 				ScreenMessages.PostScreenMessage(scrmsgCLSFull);
 
 				// HACK: temporarily disable KerbalEVA for one update frame to prevent stock boarding from being registered alongside auto boarding
@@ -328,7 +328,7 @@ namespace AirlockPlus
 				}
 			}
 			if (dest == null) {
-				Debug.Log("[AirlockPlus|BoardingPass] ERROR: Auto boarding target vessel at " + clsSpace.Crew.Count +"/"+ clsSpace.MaxCrew + "of CLS space capacity, but somehow unable to find a part with space?!");
+				Log($"ERROR: Auto boarding target vessel at {clsSpace.Crew.Count}/{clsSpace.MaxCrew} of CLS space capacity, but somehow unable to find a part with space?!");
 				return;
 			}
 
@@ -356,11 +356,11 @@ namespace AirlockPlus
 
 		#region PartModule life cycle
 		public override void OnLoad(ConfigNode node) {
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: Loading partmodule into " + part.name);
+			Log("INFO: Loading partmodule into " + part.name);
 
 			// Sanity check: this module only applies to KerbalEVAs
 			if (!part.Modules.Contains<KerbalEVA>()) {
-				Debug.Log("[AirlockPlus|BoardingPass] ERROR: " + part.name + " is not a KerbalEVA! Removing module.");
+				Log($"ERROR: {part.name} is not a KerbalEVA! Removing module.");
 				part.RemoveModule(this);
 				return;
 			}
@@ -375,7 +375,7 @@ namespace AirlockPlus
 			// use keybinding from game settings
 			boardkey = GameSettings.EVA_Board;
 			scrmsgKeys.message = Localizer.Format("#autoLOC_AirlockPlusBP001",boardkey.primary.ToString());
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: EVA_Board key is " + boardkey.primary.ToString());
+			Log("INFO: EVA_Board key is " + boardkey.primary.ToString());
 
 			GameEvents.onVesselChange.Add(OnVesselChange);
 			MapView.OnEnterMapView += OnEnterMap;
@@ -383,7 +383,7 @@ namespace AirlockPlus
 
 			// CLS support
 			if (AirlockPlus.useCLS) {
-				Debug.Log("[AirlockPlus|BoardingPass] INFO: CLS support enabled.");
+				Log("INFO: CLS support enabled.");
 				_BoardAuto = CLSBoardAuto;
 				_BoardManualListParts = CLSBoardManualListParts;
 			}
@@ -418,11 +418,15 @@ namespace AirlockPlus
 		// in case the vessel we are in the midst of manual boarding has undergone unexpected modification...
 		private void onVesselStandardModification(Vessel v) {
 			if (v != tgtAirlockPart.vessel) return;
-			Debug.Log("[AirlockPlus|BoardingPass] INFO: vessel being boarded has undergone unexpected modification!");
+			Log("INFO: vessel being boarded has undergone unexpected modification!");
 			BoardManualCxl();
 			if (tgtAirlockPart == null) return;
 			BoardManual();
 		}
 		#endregion
+
+		private void Log(string s) {
+			Debug.Log("[AirlockPlus|BoardingPass] " + s);
+		}
 	}
 }
