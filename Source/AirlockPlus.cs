@@ -195,7 +195,7 @@ namespace AirlockPlus
 				List<DialogGUIBase> items = new List<DialogGUIBase>();
 				if (useCTI) items.Add(CTIWrapper.CTI.getTrait(pcm.experienceTrait.Config.Name).makeDialogGUIImage(new Vector2(20,20),new Vector2()));
 				items.Add(new DialogGUILabel($"<size=15><b>{pcm.name}</b></size>" + ((!useCTI && pcm.type == ProtoCrewMember.KerbalType.Tourist)?$"<size=10>{Localizer.Format("#autoLOC_AirlockPlusAP002")}</size>":""),true,false));
-				items.Add(new DialogGUIButton($"<size=14>{Localizer.Format("#autoLOC_AirlockPlusAP003")}</size>",delegate{onBtnEVA(pcm);},48,24,true,null));
+				items.Add(new DialogGUIButton($"<size=14>{Localizer.Format("#autoLOC_AirlockPlusAP003")}</size>",delegate{onBtnEVA(pcm);},48,24,true,options:null));
 				DialogGUIHorizontalLayout h = new DialogGUIHorizontalLayout(false,false,0f,new RectOffset(4,0,0,0),TextAnchor.MiddleLeft,items.ToArray());
 				Stack<Transform> layouts = new Stack<Transform>();
 				layouts.Push(listContainer);
