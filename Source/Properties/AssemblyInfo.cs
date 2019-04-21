@@ -7,7 +7,7 @@ using System.Runtime.CompilerServices;
 [assembly: AssemblyConfiguration ("")]
 [assembly: AssemblyCompany ("")]
 [assembly: AssemblyProduct ("AirlockPlus")]
-[assembly: AssemblyCopyright("Copyright © 2017-2018 cake>pie")]
+[assembly: AssemblyCopyright("Copyright © 2017-2019 cake>pie")]
 [assembly: AssemblyTrademark ("")]
 [assembly: AssemblyCulture ("")]
 

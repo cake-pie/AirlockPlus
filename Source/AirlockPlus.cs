@@ -1,4 +1,4 @@
-﻿// © 2017-2018 cake>pie
+﻿// © 2017-2019 cake>pie
 // All rights reserved
 
 using System;
