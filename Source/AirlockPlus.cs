@@ -67,7 +67,7 @@ namespace AirlockPlus
 			if (hijack)
 				considerHijack();
 
-			if (Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left) && FlightUIModeController.Instance.Mode != FlightUIMode.ORBITAL) {
+			if (Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left) && !MapView.MapIsEnabled) {
 				modclick = modkey.GetKey();
 				if ( (modclick || useCTI) && Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
 					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
