@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
 using UnityEngine;
 using UnityEngine.UI;
 using KSP.UI.Screens.Flight.Dialogs;
@@ -209,11 +210,11 @@ namespace AirlockPlus
 		}
 
 		private void onBtnEVA(ProtoCrewMember pcm) {
-			// HACK: we have to resort to this way to close the CrewHatchDialog while ensuring CrewHatchController remains in a coherent state
-			// Normally, the EVA/Transfer buttons call OnEVABtn/OnTransferBtn in CrewHatchController, so it can react accordingly.
-			// If we simply call CrewHatchDialog.Terminate() it would leave CrewHatchController dangling in an active state!
-			CrewHatchController.fetch.DisableInterface();
-			CrewHatchController.fetch.EnableInterface();
+			// HACK: Properly close the CrewHatchDialog from CrewHatchController's perspective.
+			// Normally, the EVA/Transfer buttons call CrewHatchController.OnEVABtn()/OnTransferBtn(), but we need custom handling for kerbals from other parts.
+			// CrewHatchDialog.Terminate() is public, but simply calling it might leave CrewHatchController dangling in some invalid state.
+			// So we use reflection to invoke protected DismissDialog() which presumably is common to both CrewHatchController.OnEVABtn()/OnTransferBtn().
+			typeof(CrewHatchController).GetMethod("DismissDialog", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(CrewHatchController.fetch, null);
 
 			Part kerbalPart = pcm.KerbalRef.InPart;
 			Log($"INFO: EVA button pressed; {pcm.name} in part {kerbalPart.partInfo.name} of {airlockPart.vessel.vesselName} attempting to exit via airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name}");
