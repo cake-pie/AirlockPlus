@@ -64,6 +64,9 @@ namespace AirlockPlus
 		#region Input / UI
 		// emulate CrewHatchController, which uses LateUpdate(), not Update()
 		private void LateUpdate() {
+			if (FlightDriver.Pause)
+				return;
+
 			if (hijack)
 				considerHijack();
 
