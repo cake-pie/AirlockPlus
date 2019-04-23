@@ -20,9 +20,9 @@ namespace AirlockPlus
 	{
 		#region Variables
 		// tag/layer constants
-		internal static readonly int LAYER_PARTTRIGGER = 21;
-		internal static readonly string TAG_AIRLOCK = "Airlock";
-		//internal static readonly string TAG_LADDER = "Ladder";
+		internal const int LAYER_PARTTRIGGER = 21;
+		internal const string TAG_AIRLOCK = "Airlock";
+		//internal const string TAG_LADDER = "Ladder";
 
 		// screen messages
 		private static ScreenMessage scrmsg_noEVA_upgd = new ScreenMessage( Localizer.Format("#autoLOC_294633") , 5f, ScreenMessageStyle.UPPER_CENTER);  //"Cannot disembark while off of Kerbin's surface.\nAstronaut Complex upgrade required."
@@ -32,7 +32,7 @@ namespace AirlockPlus
 		private static KeyBinding modkey = null;
 
 		// raycast vars
-		private static float RAYCAST_DIST = 100f;
+		private const float RAYCAST_DIST = 100f;
 		private RaycastHit hit;
 
 		// selected airlock and part
@@ -49,7 +49,7 @@ namespace AirlockPlus
 		// Lacking any formal indication that CrewHatchDialog is "done populating", we resort to testing if the dialog header has changed from its placeholder value.
 		private int frame = 0;
 		private static int framewait = 5;
-		private static readonly string CHD_NOTREADY_HEADER = "Part Title Crew";
+		private const string CHD_NOTREADY_HEADER = "Part Title Crew";
 
 		// BoardingPass ScreenMessages setting
 		internal static bool boardingScreenMessages = true;
