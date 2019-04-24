@@ -1,4 +1,7 @@
-﻿using System;
+﻿// © 2017-2019 cake>pie
+// All rights reserved
+
+using System;
 using System.IO;
 using System.Reflection;
 using UnityEngine;

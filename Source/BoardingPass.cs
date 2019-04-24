@@ -2,7 +2,6 @@
 // All rights reserved
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using KSP.Localization;
@@ -362,7 +361,6 @@ namespace AirlockPlus
 			if (!part.Modules.Contains<KerbalEVA>()) {
 				Log($"ERROR: {part.name} is not a KerbalEVA! Removing module.");
 				part.RemoveModule(this);
-				return;
 			}
 		}
 

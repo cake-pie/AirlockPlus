@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using System.Runtime.CompilerServices;
-
 
 [assembly: AssemblyTitle ("AirlockPlus plugin for Kerbal Space Program")]
 [assembly: AssemblyDescription("")]

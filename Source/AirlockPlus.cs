@@ -1,8 +1,6 @@
 ﻿// © 2017-2019 cake>pie
 // All rights reserved
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEngine;
