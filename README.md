@@ -2,7 +2,7 @@ AirlockPlus
 ===========
 
 A mod for [Kerbal Space Program](http://kerbalspaceprogram.com).  
-[KSP Forum Thread](http://forum.kerbalspaceprogram.com/index.php?showtopic=160268)
+[ [Wiki](../../wiki) | [KSP Forum Thread](http://forum.kerbalspaceprogram.com/index.php?showtopic=160268) ]
 
 AirlockPlus allows the use of any airlock on a vessel in conjunction with any crew part on the vessel:
 - A kerbal on EVA can use any airlock to board any part of the vessel, not just the part that the airlock is attached to.
@@ -11,8 +11,6 @@ AirlockPlus allows the use of any airlock on a vessel in conjunction with any cr
 - Works even if the airlock part is already full of other kerbals. 
 
 With this mod, it becomes possible to use crew cabins that don't have airlocks, and airlock parts that don't have any crew capacity of their own. 
-
-For further information and documentation, please consult the forum thread for the mod.
 
 ---
 
