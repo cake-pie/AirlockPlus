@@ -17,6 +17,9 @@ namespace AirlockPlus
 	public sealed class AirlockPlus : MonoBehaviour
 	{
 		#region Variables
+		// singleton
+		internal static AirlockPlus Instance;
+
 		// tag/layer constants
 		internal const int LAYER_PARTTRIGGER = 21;
 		internal const string TAG_AIRLOCK = "Airlock";
@@ -250,6 +253,13 @@ namespace AirlockPlus
 		#endregion
 
 		#region MonoBehaviour life cycle
+		private void Awake() {
+			if (Instance == null)
+				Instance = this;
+			else
+				Destroy(gameObject);
+		}
+
 		private void Start() {
 			Log("INFO: Starting AirlockPlus...");
 			modkey = GameSettings.MODIFIER_KEY;
@@ -270,6 +280,11 @@ namespace AirlockPlus
 			// CTI support
 			useCTI = CTIWrapper.initCTIWrapper() && CTIWrapper.CTI.Loaded;
 			Log("INFO: CTI support is " + (useCTI?"on":"off"));
+		}
+
+		private void OnDestroy() {
+			if (Instance == this)
+				Instance = null;
 		}
 		#endregion
 
