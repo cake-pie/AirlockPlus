@@ -252,10 +252,16 @@ namespace AirlockPlus
 
 		#region MonoBehaviour life cycle
 		private void Awake() {
-			if (Instance == null)
-				Instance = this;
-			else
+			if (Instance != null) {
 				Destroy(gameObject);
+				return;
+			}
+			if (!Harmony.Patcher.harmonyAvailable) {
+				Log("ERROR: Harmony dependency not available, aborting.");
+				Destroy(gameObject);
+				return;
+			}
+			Instance = this;
 		}
 
 		private void Start() {

@@ -335,6 +335,11 @@ namespace AirlockPlus
 		public override void OnLoad(ConfigNode node) {
 			Log("INFO: Loading partmodule into " + part.name);
 
+			if (!Harmony.Patcher.harmonyAvailable) {
+				Log($"ERROR: Harmony dependency not available, removing module from {part.name}.");
+				part.RemoveModule(this);
+				return;
+			}
 			// Sanity check: this module only applies to KerbalEVAs
 			if (!part.Modules.Contains<KerbalEVA>()) {
 				Log($"ERROR: {part.name} is not a KerbalEVA! Removing module.");

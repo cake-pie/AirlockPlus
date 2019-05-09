@@ -8,9 +8,15 @@ namespace AirlockPlus.Harmony
 	[KSPAddon(KSPAddon.Startup.Instantly, true)]
 	public sealed class Patcher : MonoBehaviour
 	{
-		internal static HarmonyInstance harmony = HarmonyInstance.Create("com.github.cake-pie.AirlockPlus");
+		internal static bool harmonyAvailable = false;
+
 		private void Awake() {
+			// If Harmony dependency is missing, AddonLoader will barf in logs when instantiating addon
+			//     ADDON BINDER: Cannot resolve assembly ...
+			// and none of this will execute
+			HarmonyInstance harmony = HarmonyInstance.Create("com.github.cake-pie.AirlockPlus");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
+			harmonyAvailable = true;
 			Destroy(gameObject);
 		}
 	}
