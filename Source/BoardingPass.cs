@@ -46,9 +46,6 @@ namespace AirlockPlus
 		private Part lastHovered = null;
 		private Dictionary<uint,Part> highlightParts = new Dictionary<uint,Part>();
 
-		// stock command hint removal
-		private List<ScreenMessage> smToRemove = new List<ScreenMessage>();
-
 		// CLS support
 		private Action _BoardAuto;
 		private Action _BoardManualListParts;
