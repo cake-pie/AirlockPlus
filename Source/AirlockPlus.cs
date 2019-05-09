@@ -235,18 +235,14 @@ namespace AirlockPlus
 				return;
 			}
 
-			// HACK: ensure HatchIsObstructed functions correctly
-			// spawnEVA assumes fromPart corresponds to fromAirlock; these are passed on to FlightEVA.HatchIsObstructed
-			// Using a different fromPart than what stock expects can lead to spurious results when checking hatches for obstruction
-			// Fortunately, seems it can be fooled as long as we set the part's position to what it expects...
-			Vector3 original = kerbalPart.transform.position;
-			kerbalPart.transform.position = airlockPart.transform.position;
+			// HACK: FlightEVA.spawnEVA expects fromPart to be the part containing the kerbal
+			// AND the part having the airlock i.e. they need to be one and the same
+			// We've circumvented this with patches for FlightEVA in HarmonyPatches.cs
 			Log("DEBUG: Attempting to spawn EVA...");
 			if ( FlightEVA.fetch.spawnEVA(pcm,kerbalPart,airlock.transform) != null )
 				Log("DEBUG: EVA spawned.");
 			else
 				Log("DEBUG: spawnEVA failed.");
-			kerbalPart.transform.position = original;
 
 			airlock = null;
 			airlockPart = null;
