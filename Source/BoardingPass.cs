@@ -42,7 +42,7 @@ namespace AirlockPlus
 		private bool autoBoardingFull = false;
 
 		// manual boarding mode vars
-		private bool manualBoarding = false;
+		internal bool manualBoarding = false;
 		private Part lastHovered = null;
 		private Dictionary<uint,Part> highlightParts = new Dictionary<uint,Part>();
 
@@ -153,28 +153,6 @@ namespace AirlockPlus
 
 			if (AirlockPlus.boardingScreenMessages)
 				ScreenMessages.PostScreenMessage(scrmsgKeys);
-		}
-
-		// HACK: turn off stock command hints while in manual boarding mode
-		// Disgusting, yes, but this is the only means I have found that works, and it needs to be in LateUpdate rather than OnUpdate.
-		// Stock KSP code is apparently spamming ScreenMessages.PostScreenMessage() on *every frame* to display its command hints.
-		// These options will not work:
-		// a) ScreenMessages.Instance.enabled = false;
-		//     - No-go, because I need to show my own ScreenMessages at the same time.
-		// b) part.Modules.GetModule<KerbalEVA>().enabled = false;
-		//     - This turns kerbal into a drifting brick because KerbalEVA is responsible for maintaining correct position and orientation of the EVA kerbal part/vessel with respect to world space.
-		private void LateUpdate() {
-			if (manualBoarding) {
-				foreach (ScreenMessage sm in ScreenMessages.Instance.ActiveMessages) {
-					if(sm.style==ScreenMessageStyle.LOWER_CENTER) {
-						smToRemove.Add(sm);
-					}
-				}
-				foreach (ScreenMessage sm in smToRemove) {
-					ScreenMessages.RemoveMessage(sm);
-				}
-				smToRemove.Clear();
-			}
 		}
 		#endregion
 

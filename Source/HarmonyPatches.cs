@@ -82,4 +82,33 @@ namespace AirlockPlus.Harmony
 		}
 	}
 	#endregion FlightEVA
+
+	#region KerbalEVA
+	// https://kerbalspaceprogram.com/api/class_kerbal_e_v_a.html
+
+	// BoardingPass needs to turn off stock command hints while in manual boarding mode, which proved tricky.
+	// Stock KSP code apparently spams ScreenMessages.PostScreenMessage() on *every frame* to display its command hints.
+	// These options will not work:
+	// a) ScreenMessages.Instance.enabled = false;
+	//     - No-go, because I need to show my own ScreenMessages at the same time.
+	// b) part.Modules.GetModule<KerbalEVA>().enabled = false;
+	//     - This turns kerbal into a drifting brick because KerbalEVA is responsible for maintaining correct position
+	//       and orientation of the EVA kerbal part/vessel with respect to world space.
+	// One disgusting but functional workaround was to run code every frame in LateUpdate (OnUpdate didn't work!) which
+	// iterates over ScreenMessages.Instance.ActiveMessages and remove all messages in LOWER_CENTER position
+	// This approach is so much better, we can get KerbalEVA to STFU while manual boarding is active.
+
+	// protected virtual void PostInteractionScreenMessage(string message, float delay=0.1f)
+	[HarmonyPatch(typeof(KerbalEVA))]
+	[HarmonyPatch("PostInteractionScreenMessage")]
+	internal class KerbalEVA_PostInteractionScreenMessage
+	{
+		[HarmonyPrefix]
+		private static bool Prefix(KerbalEVA __instance) {
+			if (__instance.part.Modules.GetModule<BoardingPass>()?.manualBoarding ?? false)
+				return false;
+			return true;
+		}
+	}
+	#endregion KerbalEVA
 }
