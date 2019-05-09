@@ -39,7 +39,7 @@ namespace AirlockPlus
 		private Part tgtAirlockPart = null;
 
 		// auto boarding mode vars
-		private bool autoBoardingFull = false;
+		internal bool autoBoardingFull = false;
 
 		// manual boarding mode vars
 		internal bool manualBoarding = false;
@@ -84,11 +84,8 @@ namespace AirlockPlus
 			if (tgtAirlockPart == null || !HighLogic.LoadedSceneIsFlight || !vessel.isActiveVessel || inMap)
 				return;
 
-			// HACK: re-enable KerbalEVA one frame after blocking stock boarding from registering alongside auto boarding
-			if (autoBoardingFull) {
-				keva.enabled = true;
+			if (autoBoardingFull)
 				autoBoardingFull = false;
-			}
 
 			if (manualBoarding) {
 				// Not checking for input locks in here, we should be holding the lock on all but camera controls at this juncture
@@ -161,12 +158,7 @@ namespace AirlockPlus
 			if (tgtAirlockPart.vessel.GetCrewCount() >= tgtAirlockPart.vessel.GetCrewCapacity()) {
 				Log("INFO: Auto boarding failed - vessel full");
 				ScreenMessages.PostScreenMessage(scrmsgVesFull);
-
-				// HACK: temporarily disable KerbalEVA for one update frame to prevent stock boarding from being registered alongside auto boarding
-				// this prevents "spurious" stock "Cannot board a full module" message appearing alongside our auto boarding "Cannot board a full vessel"
-				keva.enabled = false;
 				autoBoardingFull = true;
-
 				return;
 			}
 
@@ -251,10 +243,8 @@ namespace AirlockPlus
 
 		private void BoardCxl() {
 			tgtAirlockPart = null;
-			if (autoBoardingFull) {
-				keva.enabled = true;
+			if (autoBoardingFull)
 				autoBoardingFull = false;
-			}
 			if (manualBoarding)
 				BoardManualCxl();
 			else
@@ -279,12 +269,7 @@ namespace AirlockPlus
 			if (clsSpace.Crew.Count >= clsSpace.MaxCrew) {
 				Log("INFO: Auto boarding failed - CLS space full");
 				ScreenMessages.PostScreenMessage(scrmsgCLSFull);
-
-				// HACK: temporarily disable KerbalEVA for one update frame to prevent stock boarding from being registered alongside auto boarding
-				// this prevents "spurious" stock "Cannot board a full module" message appearing alongside our auto boarding "Cannot board a full vessel"
-				keva.enabled = false;
 				autoBoardingFull = true;
-
 				return;
 			}
 

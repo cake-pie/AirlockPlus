@@ -116,5 +116,24 @@ namespace AirlockPlus.Harmony
 			return true;
 		}
 	}
+
+	// When auto-boarding in BoardingPass encounters a completely full vessel, it displays a screen message and quits.
+	// This leaves it open for stock KSP code to capture the same "B" keypress (from Shift+B) and attempt boarding also
+	// leading to additional screen message (#autoLOC_115954 = Cannot board a full module.) which we want to suppress.
+	// Previously this was done by outright disabling KerbalEVA for one frame, a slightly risky hack.
+	// Silencing PostInteractionScreenMessage() does not help, the screenmessage seems to emanate from BoardPart()
+
+	// public virtual void BoardPart (Part p)
+	[HarmonyPatch(typeof(KerbalEVA))]
+	[HarmonyPatch("BoardPart")]
+	internal class KerbalEVA_BoardPart
+	{
+		[HarmonyPrefix]
+		private static bool Prefix(KerbalEVA __instance) {
+			if (__instance.part.Modules.GetModule<BoardingPass>()?.autoBoardingFull ?? false)
+				return false;
+			return true;
+		}
+	}
 	#endregion KerbalEVA
 }
