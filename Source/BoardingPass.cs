@@ -39,9 +39,11 @@ namespace AirlockPlus
 		private Part tgtAirlockPart = null;
 
 		// auto boarding mode vars
+		// this flag is used by harmony patch to prevent stock boarding from registering alongside auto boarding when vessel is full
 		internal bool autoBoardingFull = false;
 
 		// manual boarding mode vars
+		// this flag is used by harmony patch to suppress stock command hint screen messages
 		internal bool manualBoarding = false;
 		private Part lastHovered = null;
 		private Dictionary<uint,Part> highlightParts = new Dictionary<uint,Part>();
