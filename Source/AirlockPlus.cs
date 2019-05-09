@@ -37,8 +37,9 @@ namespace AirlockPlus
 		private RaycastHit hit;
 
 		// selected airlock and part
-		private Collider airlock;
-		private Part airlockPart;
+		internal Collider airlock;
+		internal Part airlockPart;
+		internal Part kerbalPart;
 
 		// hijacking the CrewHatchDialog to display alternative crew list
 		private bool modclick = false;
@@ -217,7 +218,7 @@ namespace AirlockPlus
 			// So we use reflection to invoke protected DismissDialog() which presumably is common to both CrewHatchController.OnEVABtn()/OnTransferBtn().
 			typeof(CrewHatchController).GetMethod("DismissDialog", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(CrewHatchController.fetch, null);
 
-			Part kerbalPart = pcm.KerbalRef.InPart;
+			kerbalPart = pcm.KerbalRef.InPart;
 			Log($"INFO: EVA button pressed; {pcm.name} in part {kerbalPart.partInfo.name} of {airlockPart.vessel.vesselName} attempting to exit via airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name}");
 
 			// sanity checks, in case of unexpected death, destruction or separation
@@ -249,6 +250,7 @@ namespace AirlockPlus
 
 			airlock = null;
 			airlockPart = null;
+			kerbalPart = null;
 		}
 		#endregion
 
