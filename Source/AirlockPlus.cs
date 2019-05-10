@@ -143,7 +143,7 @@ namespace AirlockPlus
 			} else {
 				if (!CrewHatchController.fetch.Active) {
 					Log("INFO: CrewHatchController became inactive, aborting hijack.");
-					EndHijack();
+					AbortHijack();
 					return;
 				}
 			}
@@ -159,7 +159,7 @@ namespace AirlockPlus
 			} else {
 				if (CrewHatchController.fetch.CrewDialog == null) {
 					Log("INFO: CrewDialog became null, aborting hijack.");
-					EndHijack();
+					AbortHijack();
 					return;
 				}
 			}
@@ -171,35 +171,41 @@ namespace AirlockPlus
 		private void AbortIfTimeout() {
 			if (frame >= framewait) {
 				Log("INFO: still no CrewHatchDialog instance located, aborting hijack.");
-				EndHijack();
+				AbortHijack();
 			}
+		}
+
+		private void AbortHijack() {
+			hijack = false;
+			foundActiveCHC = false;
+			chd = null;
+			frame = 0;
 		}
 
 		// stock KSP done setting up CrewHatchDialog contents, proceed with hijacking
 		internal void OnCHDReady(CrewHatchDialog chdr) {
 			if (chd == null)
 				chd = chdr;
-			if (hijack)
-				doHijack();
-			else if (useCTI)
-				doAugment();
-			EndHijack();
+			// hold on to chd if hijacking
+			// allows cleanup via OnCHDTerminated() regardless of whether any kerbal went EVA
+			if (hijack) doHijack();
+			else {
+				if (useCTI) doAugment();
+				chd = null;
+			}
+			hijack = false;
+			foundActiveCHC = false;
+			frame = 0;
 		}
 
 		internal void OnCHDTerminated(CrewHatchDialog chdt) {
-			if (hijack && chd == chdt) {
-				EndHijack();
+			if (chd == chdt) {
+				if (hijack) AbortHijack();
+				chd = null;
 				airlock = null;
 				airlockPart = null;
 				kerbalPart = null;
 			}
-		}
-
-		private void EndHijack() {
-			hijack = false;
-			foundActiveCHC = false;
-			chd = null;
-			frame = 0;
 		}
 		#endregion
 
@@ -284,12 +290,6 @@ namespace AirlockPlus
 		}
 
 		private void onBtnEVA(ProtoCrewMember pcm) {
-			// HACK: Properly close the CrewHatchDialog from CrewHatchController's perspective.
-			// Normally, the EVA/Transfer buttons call CrewHatchController.OnEVABtn()/OnTransferBtn(), but we need custom handling for kerbals from other parts.
-			// CrewHatchDialog.Terminate() is public, but simply calling it might leave CrewHatchController dangling in some invalid state.
-			// So we use reflection to invoke protected DismissDialog() which presumably is common to both CrewHatchController.OnEVABtn()/OnTransferBtn().
-			typeof(CrewHatchController).GetMethod("DismissDialog", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(CrewHatchController.fetch, null);
-
 			kerbalPart = pcm.KerbalRef.InPart;
 			Log($"INFO: EVA button pressed; {pcm.name} in part {kerbalPart.partInfo.name} of {airlockPart.vessel.vesselName} attempting to exit via airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name}");
 
@@ -316,9 +316,12 @@ namespace AirlockPlus
 			else
 				Log("DEBUG: spawnEVA failed.");
 
-			airlock = null;
-			airlockPart = null;
-			kerbalPart = null;
+			// HACK: Properly close the CrewHatchDialog from CrewHatchController's perspective.
+			// Normally, the EVA/Transfer buttons call CrewHatchController.OnEVABtn()/OnTransferBtn(), but we need custom handling for kerbals from other parts.
+			// CrewHatchDialog.Terminate() is public, but simply calling it might leave CrewHatchController dangling in some invalid state.
+			// So we use reflection to invoke protected DismissDialog() which presumably is common to both CrewHatchController.OnEVABtn()/OnTransferBtn().
+			typeof(CrewHatchController).GetMethod("DismissDialog", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(CrewHatchController.fetch, null);
+			// OnCHDTerminated() will take care of cleanup
 		}
 		#endregion
 

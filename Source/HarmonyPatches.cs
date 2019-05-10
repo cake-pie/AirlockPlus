@@ -46,6 +46,7 @@ namespace AirlockPlus.Harmony
 	}
 
 	// We then also need a way to know in case CrewHatchDialog spawn/populate is aborted before it is ready
+	// Also useful for cleanup when CrewHatchDialog closed regardless of whether any kerbal went EVA
 
 	// protected void Terminate()
 	[HarmonyPatch(typeof(CrewHatchDialog))]
