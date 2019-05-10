@@ -9,6 +9,6 @@
 [assembly: AssemblyTrademark ("")]
 [assembly: AssemblyCulture ("")]
 
-[assembly: AssemblyVersion ("0.0.10.0")]
+[assembly: AssemblyVersion ("0.0.10.9")]
 
 [assembly: KSPAssembly("AirlockPlus", 0, 0)]
