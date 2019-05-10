@@ -1,5 +1,6 @@
 using System.Reflection;
 using UnityEngine;
+using KSP.UI.Screens.Flight.Dialogs;
 using Harmony;
 
 namespace AirlockPlus.Harmony
@@ -21,6 +22,44 @@ namespace AirlockPlus.Harmony
 		}
 	}
 	#endregion Patcher
+
+	#region CrewHatchDialog
+	// https://kerbalspaceprogram.com/api/class_k_s_p_1_1_u_i_1_1_screens_1_1_flight_1_1_dialogs_1_1_crew_hatch_dialog.html
+
+	// It seems to take stock KSP an inconsistent amount of time to instantiate and populate the CrewHatchDialog
+	// We need to wait for stock KSP to finish populating the CrewHatchDialog before augmenting or hijacking it
+	// otherwise it will overwrite our stuff (instead of the other way round)
+	// KSP API provides no formal indication for this (there are GameEvents for a couple other UI dialogs)
+	// Use a postfix to provide notification that dialog has been populated
+
+	// protected void CreatePanelContent()
+	[HarmonyPatch(typeof(CrewHatchDialog))]
+	[HarmonyPatch("CreatePanelContent")]
+	internal class CrewHatchDialog_CreatePanelContent
+	{
+		[HarmonyPostfix]
+		private static void Postfix(CrewHatchDialog __instance) {
+			if (!HighLogic.LoadedSceneIsFlight || AirlockPlus.Instance == null)
+				return;
+			AirlockPlus.Instance.OnCHDReady(__instance);
+		}
+	}
+
+	// We then also need a way to know in case CrewHatchDialog spawn/populate is aborted before it is ready
+
+	// protected void Terminate()
+	[HarmonyPatch(typeof(CrewHatchDialog))]
+	[HarmonyPatch("Terminate")]
+	internal class CrewHatchDialog_Terminate
+	{
+		[HarmonyPostfix]
+		private static void Postfix(CrewHatchDialog __instance) {
+			if (!HighLogic.LoadedSceneIsFlight || AirlockPlus.Instance == null)
+				return;
+			AirlockPlus.Instance.OnCHDTerminated(__instance);
+		}
+	}
+	#endregion CrewHatchDialog
 
 	#region FlightEVA
 	// https://kerbalspaceprogram.com/api/class_flight_e_v_a.html

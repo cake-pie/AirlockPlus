@@ -42,16 +42,13 @@ namespace AirlockPlus
 		internal Part kerbalPart;
 
 		// hijacking the CrewHatchDialog to display alternative crew list
-		private bool modclick = false;
 		private bool hijack = false;
+		private bool foundActiveCHC = false;
 		private CrewHatchDialog chd;
-		// HACK: check if stock KSP is done populating CrewHatchDialog before hijacking it
-		// It takes stock KSP an inconsistent amount of time to activate CrewHatchController, and then spawn and populate the CrewHatchDialog.
-		// We need to wait for stock KSP to finish populating the CrewHatchDialog, otherwise it will overwrite our stuff (instead of the other way round).
-		// Lacking any formal indication that CrewHatchDialog is "done populating", we resort to testing if the dialog header has changed from its placeholder value.
+		// HACK: we have to do our own input handling and try to match it up correctly with stock CrewHatchDialog activation
+		// these provide timeout mechanism if a corresponding dialog activation does not materialize after user input
 		private int frame = 0;
 		private static int framewait = 5;
-		private const string CHD_NOTREADY_HEADER = "Part Title Crew";
 
 		// BoardingPass ScreenMessages setting
 		internal static bool boardingScreenMessages = true;
@@ -64,73 +61,151 @@ namespace AirlockPlus
 		internal static bool useCTI = true;
 		#endregion
 
-		#region Input / UI
-		// emulate CrewHatchController, which uses LateUpdate(), not Update()
+		#region Input Handling
 		private void LateUpdate() {
 			if (FlightDriver.Pause)
 				return;
 
 			if (hijack)
-				considerHijack();
+				CheckHijackTimeout();
 
-			if (Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left) && !MapView.MapIsEnabled) {
-				modclick = modkey.GetKey();
-				if ( (modclick || useCTI) && Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) ) {
-					if (hit.collider.CompareTag(TAG_AIRLOCK)) {
-						if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
-							Log($"INFO: {(modclick?"mod+":"")}click detected on airlock, but input lock is active.");
-							Debug.Log(InputLockManager.PrintLockStack());
-						} else {
-							Log($"INFO: {(modclick?"mod+":"")}click detected on airlock, standing by to hijack CrewHatchDialog.");
-							airlock = hit.collider;
-							hijack = true;
-							chd = null;
-							frame = 0;
-						}
-					}
+			if (
+				modkey.GetKey() && Mouse.CheckButtons(Mouse.GetAllMouseButtonsDown(),Mouse.Buttons.Left) && !MapView.MapIsEnabled &&
+				Physics.Raycast(FlightCamera.fetch.mainCamera.ScreenPointToRay(Input.mousePosition), out hit, RAYCAST_DIST, 1<<LAYER_PARTTRIGGER, QueryTriggerInteraction.Collide) &&
+				hit.collider.CompareTag(TAG_AIRLOCK)
+			) {
+				if (InputLockManager.IsAllLocked(ControlTypes.KEYBOARDINPUT)) {
+					Log("INFO: mod+click detected on airlock, but input lock is active.");
+					Debug.Log(InputLockManager.PrintLockStack());
+				} else {
+					Log("INFO: mod+click detected on airlock, standing by to hijack CrewHatchDialog.");
+					airlock = hit.collider;
+					airlockPart = null;
+					kerbalPart = null;
+					hijack = true;
+					foundActiveCHC = false;
+					chd = null;
+					frame = 0;
 				}
 			}
 		}
 
-		private void considerHijack() {
+		// HACK: matching our input handling with stock response to its own input handling
+		// Presumably CrewHatchController handles player input and does raycasting to detect clicks on airlocks
+		// but none of that is exposed to us via API so we are forced to do our own and then try to match it up
+		// correctly with the stock CrewHatchDialog activation.
+		// It seems to take stock KSP an inconsistent amount of time to instantiate and populate CrewHatchDialog
+		// We need to wait for stock KSP to finish populating the CrewHatchDialog before augmenting or hijacking it
+		// otherwise it will overwrite our stuff (instead of the other way round)
+		// Based on tests using Harmony prefixes/postfixes to add debugging log outputs before and after
+		// various methods in CrewHatchController and CrewHatchDialog we know the following behaviors
+		// - CrewHatchController.SpawnCrewDialog() causes
+		//   - Active false -> true
+		//   - CrewDialog null -> not null, TextHeader = Part Title Crew
+		// - CrewHatchDialog.CreatePanelContent() causes
+		//   - TextHeader = Part Title Crew -> <part name> Crew
+		//   - list populated with crew in the part
+		// - CrewHatchController.DismissDialog() gets called by OnEVABtn(), OnTransferBtn() as well as others
+		// - CrewHatchDialog.Terminate() gets called by CrewHatchController.DismissDialog() as well as others
+		// We have to accommodate any difference in implementation between our input handling and that of stock,
+		// which means CrewHatchController may not activate or CrewHatchDialog may not spawn, so implement a
+		// timeout mechanism if corresponding dialog activation does not materialize after user input
+		// We also have to handle situations where the dialog activation may be cancelled before it is ready
+		// Logic is as follows
+		// - any fresh detected mod+click input resets the timeout and discards old information
+		//   assume we are now trying to match up with the new user input
+		// - track when CrewHatchController becomes active after input detected
+		//   if it becomes inactive again, treat as cancellation and abort
+		// - when CrewHatchController is active, look for non-null member CrewDialog
+		//   if it goes back to being null, treat as cancellation and abort
+		// - if the detected CrewDialog runs Terminate before becoming ready, treat as cancellation and abort
+		// - if any CrewHatchDialog becomes ready at any time
+		//   - treat as hijack target if we are anticipating one
+		//   - otherwise treat as augmentation target if CTI is available
+		// - if number of frames passed has exceeded framewait and:
+		//   - CrewHatchController is still inactive: abort
+		//   - CrewHatchController active but CrewDialog still null: abort
+		//   - CrewHatchController active, CrewDialog instantiated but not ready: continue waiting
+		//     - CrewDialog becomes ready: proceed
+		//     - CrewHatchController becomes active, or CrewDialog becomes null or terminated: abort
+		private void CheckHijackTimeout() {
 			frame++;
-			Log("INFO: considering hijack @ frame +" + frame);
+			Log("INFO: checking hijack timeout @ frame +" + frame);
 
-			// can't do anything if CrewHatchController isn't active yet
-			if (!CrewHatchController.fetch.Active) {
-				// abort if CrewHatchController still isn't active after framewait -- e.g. player may have cancelled by clicking elsewhere
-				if (frame >= framewait) {
-					Log("INFO: CrewHatchController is still inactive, aborting hijack.");
-					hijack = false;
-					chd = null;
-					frame = 0;
+			if (!foundActiveCHC) {
+				if (CrewHatchController.fetch.Active) {
+					Log("INFO: found active CrewHatchController.");
+					foundActiveCHC = true;
+				} else {
+					AbortIfTimeout();
+					return;
 				}
-				return;
-			}
-
-			// fetch CrewHatchDialog
-			if (chd == null) {
-				chd = CrewHatchController.fetch.CrewDialog;
-				if (chd == null) {
-					Log("ERROR: failed to obtain CrewHatchDialog.");
+			} else {
+				if (!CrewHatchController.fetch.Active) {
+					Log("INFO: CrewHatchController became inactive, aborting hijack.");
+					EndHijack();
 					return;
 				}
 			}
 
-			// test if TextHeader has been changed from its placeholder value, as proxy indicator for CrewHatchDialog "done populating"
-			if (CHD_NOTREADY_HEADER.Equals(chd.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text))
-				return;
+			if (chd == null) {
+				if (CrewHatchController.fetch.CrewDialog != null) {
+					Log("INFO: CrewDialog instance located.");
+					chd = CrewHatchController.fetch.CrewDialog;
+				} else {
+					AbortIfTimeout();
+					return;
+				}
+			} else {
+				if (CrewHatchController.fetch.CrewDialog == null) {
+					Log("INFO: CrewDialog became null, aborting hijack.");
+					EndHijack();
+					return;
+				}
+			}
 
-			// stock KSP done setting up CrewHatchDialog contents, proceed with hijacking
-			airlockPart = airlock.GetComponentInParent<Part>();
-			if (modclick) doHijack();
-			else doAugment();
-			hijack = false;
-			frame = 0;
+			// CrewHatchController is active and CrewHatchDialog instance exists
+			// awaiting OnCHDReady()
 		}
 
+		private void AbortIfTimeout() {
+			if (frame >= framewait) {
+				Log("INFO: still no CrewHatchDialog instance located, aborting hijack.");
+				EndHijack();
+			}
+		}
+
+		// stock KSP done setting up CrewHatchDialog contents, proceed with hijacking
+		internal void OnCHDReady(CrewHatchDialog chdr) {
+			if (chd == null)
+				chd = chdr;
+			if (hijack)
+				doHijack();
+			else if (useCTI)
+				doAugment();
+			EndHijack();
+		}
+
+		internal void OnCHDTerminated(CrewHatchDialog chdt) {
+			if (hijack && chd == chdt) {
+				EndHijack();
+				airlock = null;
+				airlockPart = null;
+				kerbalPart = null;
+			}
+		}
+
+		private void EndHijack() {
+			hijack = false;
+			foundActiveCHC = false;
+			chd = null;
+			frame = 0;
+		}
+		#endregion
+
+		#region UI
 		private void doAugment() {
-			Log($"INFO: augmenting CrewHatchDialog for airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name} of {airlockPart.vessel.vesselName}");
+			Log($"INFO: augmenting CrewHatchDialog for part {chd.Part.partInfo.name} of {chd.Part.vessel.vesselName}");
 
 			// Content transform of Scroll View
 			Transform listContainer = chd.GetComponentInChildren<ContentSizeFitter>().transform;
@@ -143,11 +218,10 @@ namespace AirlockPlus
 				icon.transform.SetAsFirstSibling();
 				icon.SetActive(true);
 			}
-
-			chd = null;
 		}
 
 		private void doHijack() {
+			airlockPart = airlock.GetComponentInParent<Part>();
 			Log($"INFO: hijacking CrewHatchDialog for airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name} of {airlockPart.vessel.vesselName}");
 
 			// TextHeader
@@ -189,8 +263,6 @@ namespace AirlockPlus
 				// TextModuleCrew
 				chd.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlusAP001", airlockPart.vessel.GetCrewCount(), airlockPart.vessel.GetCrewCapacity());
 			}
-
-			chd = null;
 		}
 
 		private void addCrewToList(Transform listContainer, Part p) {
