@@ -1,3 +1,6 @@
+// © 2017-2019 cake>pie
+// All rights reserved
+
 using System.Reflection;
 using UnityEngine;
 using KSP.UI.Screens.Flight.Dialogs;

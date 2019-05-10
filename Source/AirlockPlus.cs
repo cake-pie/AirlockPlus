@@ -188,9 +188,9 @@ namespace AirlockPlus
 				chd = chdr;
 			// hold on to chd if hijacking
 			// allows cleanup via OnCHDTerminated() regardless of whether any kerbal went EVA
-			if (hijack) doHijack();
+			if (hijack) DoHijack();
 			else {
-				if (useCTI) doAugment();
+				if (useCTI) DoAugment();
 				chd = null;
 			}
 			hijack = false;
@@ -210,7 +210,7 @@ namespace AirlockPlus
 		#endregion
 
 		#region UI
-		private void doAugment() {
+		private void DoAugment() {
 			Log($"INFO: augmenting CrewHatchDialog for part {chd.Part.partInfo.name} of {chd.Part.vessel.vesselName}");
 
 			// Content transform of Scroll View
@@ -226,7 +226,7 @@ namespace AirlockPlus
 			}
 		}
 
-		private void doHijack() {
+		private void DoHijack() {
 			airlockPart = airlock.GetComponentInParent<Part>();
 			Log($"INFO: hijacking CrewHatchDialog for airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name} of {airlockPart.vessel.vesselName}");
 
@@ -248,14 +248,14 @@ namespace AirlockPlus
 			listContainer.GetChild(0).gameObject.SetActive(false);
 
 			// Crew in airlock part
-			addCrewToList(listContainer, airlockPart);
+			AddCrewToList(listContainer, airlockPart);
 
 			if (useCLS && !CLS.AllowUnrestrictedTransfers) {
 				// Crew in other parts
 				ICLSSpace clsSpace = CLS.getCLSVessel(airlockPart.vessel).Parts.Find(x => x.Part == airlockPart).Space;
 				foreach (ICLSPart p in clsSpace.Parts) {
 					if (p.Part != airlockPart)
-						addCrewToList(listContainer.transform, p.Part);
+						AddCrewToList(listContainer.transform, p.Part);
 				}
 				// TextModuleCrew
 				chd.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlusAP001", clsSpace.Crew.Count, clsSpace.MaxCrew);
@@ -264,14 +264,14 @@ namespace AirlockPlus
 				// Crew in other parts
 				foreach (Part p in airlockPart.vessel.parts) {
 					if (p != airlockPart)
-						addCrewToList(listContainer.transform, p);
+						AddCrewToList(listContainer.transform, p);
 				}
 				// TextModuleCrew
 				chd.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = Localizer.Format("#autoLOC_AirlockPlusAP001", airlockPart.vessel.GetCrewCount(), airlockPart.vessel.GetCrewCapacity());
 			}
 		}
 
-		private void addCrewToList(Transform listContainer, Part p) {
+		private void AddCrewToList(Transform listContainer, Part p) {
 			if (p.CrewCapacity == 0 || p.protoModuleCrew.Count == 0 || p.Modules.Contains<KerbalEVA>())
 				return;
 
@@ -280,7 +280,7 @@ namespace AirlockPlus
 					List<DialogGUIBase> items = new List<DialogGUIBase>();
 					if (useCTI) items.Add(CTIWrapper.CTI.getTrait(pcm.experienceTrait.Config.Name).makeDialogGUIImage(new Vector2(20,20),new Vector2()));
 					items.Add(new DialogGUILabel($"<size=15><b>{pcm.name}</b></size>" + ((!useCTI && pcm.type == ProtoCrewMember.KerbalType.Tourist)?$"<size=10>{Localizer.Format("#autoLOC_AirlockPlusAP002")}</size>":""),true,false));
-					items.Add(new DialogGUIButton($"<size=14>{Localizer.Format("#autoLOC_AirlockPlusAP003")}</size>",delegate{onBtnEVA(pcm);},48,24,true,options:null));
+					items.Add(new DialogGUIButton($"<size=14>{Localizer.Format("#autoLOC_AirlockPlusAP003")}</size>",delegate{OnBtnEVA(pcm);},48,24,true,options:null));
 					DialogGUIHorizontalLayout h = new DialogGUIHorizontalLayout(false,false,0f,new RectOffset(4,0,0,0),TextAnchor.MiddleLeft,items.ToArray());
 					Stack<Transform> layouts = new Stack<Transform>();
 					layouts.Push(listContainer);
@@ -289,7 +289,7 @@ namespace AirlockPlus
 				}
 		}
 
-		private void onBtnEVA(ProtoCrewMember pcm) {
+		private void OnBtnEVA(ProtoCrewMember pcm) {
 			kerbalPart = pcm.KerbalRef.InPart;
 			Log($"INFO: EVA button pressed; {pcm.name} in part {kerbalPart.partInfo.name} of {airlockPart.vessel.vesselName} attempting to exit via airlock {airlock.gameObject.name} on part {airlockPart.partInfo.name}");
 

@@ -202,7 +202,7 @@ namespace AirlockPlus
 			CrewHatchController.fetch.DisableInterface();
 
 			// register for onVesselStandardModification to be notified in case the vessel being boarded undergoes unexpected modification e.g. crashing / burning up in atmosphere / blowing up
-			GameEvents.onVesselStandardModification.Add(onVesselStandardModification);
+			GameEvents.onVesselStandardModification.Add(OnVesselStandardModification);
 		}
 
 		private void BoardManualListParts() {
@@ -240,7 +240,7 @@ namespace AirlockPlus
 			InputLockManager.RemoveControlLock("AirlockPlusBoardingPass");
 			CrewHatchController.fetch.EnableInterface();
 
-			GameEvents.onVesselStandardModification.Remove(onVesselStandardModification);
+			GameEvents.onVesselStandardModification.Remove(OnVesselStandardModification);
 		}
 
 		private void BoardCxl() {
@@ -381,7 +381,7 @@ namespace AirlockPlus
 		}
 
 		// in case the vessel we are in the midst of manual boarding has undergone unexpected modification...
-		private void onVesselStandardModification(Vessel v) {
+		private void OnVesselStandardModification(Vessel v) {
 			if (v != tgtAirlockPart.vessel) return;
 			Log("INFO: vessel being boarded has undergone unexpected modification!");
 			BoardManualCxl();
