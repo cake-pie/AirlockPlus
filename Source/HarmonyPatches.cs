@@ -18,6 +18,8 @@ namespace AirlockPlus.Harmony
 			// If Harmony dependency is missing, AddonLoader will barf in logs when instantiating addon
 			//     ADDON BINDER: Cannot resolve assembly ...
 			// and none of this will execute
+			Assembly harmonyAssy = typeof(HarmonyInstance).Assembly;
+			Debug.Log($"[AirlockPlus|Patcher] Using Harmony {harmonyAssy.GetName().Version.ToString()} located at {harmonyAssy.Location}");
 			HarmonyInstance harmony = HarmonyInstance.Create("com.github.cake-pie.AirlockPlus");
 			harmony.PatchAll(Assembly.GetExecutingAssembly());
 			harmonyAvailable = true;
